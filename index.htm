@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>rbCanvas/p5</title>
+<!-- rbCanvas/p5 editor v0.5.1 -->
+</head>
+<body>
+<script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/opal/opal_patched.min.js"></script>
+<script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/opal/opal-parser_patched.min.js" onload="Opal.load('opal-parser'); Opal.load('parser/ruby31');"></script>
+<script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/opal/native.min.js" onload="Opal.load('native')"></script>
+<script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/opal/date.min.js" onload="Opal.load('date')"></script>
+<script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/p5/p5.min.js"></script>
+<script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/rbcanvasp5/rbcanvasp5.js"></script>
+<script type="text/ruby" section="s05" name="deepcopy">
+$PROGRAM_NAME = "deepcopy"
+# 追加のコード (your supplementary code here)
+def deepcopy(array)
+  list = []
+  for y in 0...5
+    list.push([])
+    for x in 0...5
+      list[y].push(array[y][x])
+    end
+  end
+  
+  return list
+end
+$PROGRAM_NAME = "deepcopy"
+</script>
+<script type="text/ruby" section="s04" name="moving">
+$PROGRAM_NAME = "moving"
+# 追加のコード (your supplementary code here)
+def moving(colors)
+  need_frame = 20
+  
+  angles = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]]
+  direction = angles[$moving_states[:angle] / 45]
+  frame_now = frameCount - $moving_states[:frame] - 1
+  
+  baseX, baseY = ($sx + 0.5) * $size, ($sy + 0.5) * $size
+  fill(colors[$moving_states[:coma]])
+  circle(baseX + direction[0] * $size * frame_now / need_frame, baseY + direction[1] * $size * frame_now / need_frame, $size * 0.8)
+  
+  lx = $sx + direction[0]
+  ly = $sy + direction[1]
+  if frame_now == 0
+    if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly
+      $maps[$sy][$sx] = $moving_states[:coma]
+      $state = "stand by"
+      
+      if $maps == $maps_hozons[1] # 千日手
+        $maps = deepcopy($maps_hozons[0])
+        put_telop("千日手です")
+      elsif $maps == $maps_hozons[0] # 何も動かない手
+        put_telop("その手はできません")
+      else  
+        next_turn
+      end
+    else
+      if $maps[ly][lx] != 0
+        $maps[$sy][$sx] = $moving_states[:coma]
+        $moving_states[:coma] = $maps[ly][lx]
+        $sx, $sy = lx, ly
+        $maps[$sy][$sx] = 0
+        $moving_states[:frame] = frameCount
+      end
+    end
+  end
+  
+  if frame_now == need_frame
+    $moving_states[:frame] = frameCount
+    $sx, $sy = lx, ly
+  end
+end
+$PROGRAM_NAME = "moving"
+</script>
+<script type="text/ruby" section="s03" name="putting">
+$PROGRAM_NAME = "putting"
+# 追加のコード (your supplementary code here)
+def putting(colors)
+  $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
+  noFill
+  stroke(colors[$turn])
+  strokeWeight($size * 0.07)
+  rectMode(CORNERS)
+  rect(
+    ($cx - $csize) * $size, ($cy - $csize) * $size, 
+    ($cx + 1 + $csize) * $size, ($cy + 1 + $csize) * $size)
+    
+  baseX, baseY = ($sx + 0.5) * $size, ($sy + 0.5) * $size
+  fill(colors[$turn])
+  noStroke
+  angle = round(Math.degrees(Math.atan((mouseX - baseX) / (mouseY - baseY))) / 45.0) * 45
+  if mouseY - baseY < 0
+    angle += 180
+  end
+  
+  if angle == -90
+    angle = 270
+  end
+
+  if frameCount % 40 == 0
+    $s_distance = 0
+  end
+  $s_distance += (50 - $s_distance) * 0.1
+  
+  # カーソルが遠すぎたり近すぎたりするとキャンセル
+  is_cancel_if_click = false
+  if (mouseX - baseX).abs < $size * 0.5 and (mouseY - baseY).abs < $size * 0.5
+    $s_distance = 0
+    is_cancel_if_click = true
+  end
+  if (mouseX - baseX).abs > $size * 3 or (mouseY - baseY).abs > $size * 3
+    $s_distance = 0
+    is_cancel_if_click = true
+  end
+  
+  circle(baseX + Math.sin(Math.radians(angle)) * $s_distance, baseY + Math.cos(Math.radians(angle)) * $s_distance, $size * 0.8)
+  
+  if mouseIsPressed and mouseButton == LEFT and $can_mouse_click
+    if not is_cancel_if_click
+      $moving_states = {coma: $turn, angle: angle, frame: frameCount}
+      $state = "moving"
+    else
+      $maps[$sy][$sx] = $turn
+      $state = "stand by"
+    end
+    $can_mouse_click = false
+  end
+end
+
+$PROGRAM_NAME = "putting"
+</script>
+<script type="text/ruby" section="s02" name="standby">
+$PROGRAM_NAME = "standby"
+# 追加のコード (your supplementary code here)
+def standby(colors, colors_bright)
+    $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
+  if $mouse_is_moved
+    $cx_real, $cy_real = [[(mouseX / $size.to_f).to_i, 0].max, 4].min, [[(mouseY / $size.to_f).to_i, 0].max, 4].min #/
+  end
+  
+  noFill
+  stroke(colors_bright[$turn])
+  strokeWeight($size * 0.07)
+  rectMode(CORNERS)
+  rect(
+    ($cx - $csize) * $size, ($cy - $csize) * $size, 
+    ($cx + 1 + $csize) * $size, ($cy + 1 + $csize) * $size)
+  
+  if mouseIsPressed and mouseButton == LEFT and $can_mouse_click
+    $can_mouse_click = false
+    $sx, $sy = $cx_real, $cy_real
+    can_put = can_put_judge($sx, $sy)
+    
+    if $maps[$sy][$sx] == $turn or $maps[$sy][$sx] == 0
+      if $maps[$sy][$sx] == 0
+        if can_put
+          $maps[$sy][$sx] = $turn
+          $csize_real = -0.6
+          next_turn
+        else
+          $csize_real = -0.2
+          put_telop("置けません")
+        end
+      else
+        $maps[$sy][$sx] = 0
+        $state = "putting"
+      end
+    else
+      $csize_real = -0.2
+      put_telop("敵のコマです")
+    end
+  end
+end
+$PROGRAM_NAME = "standby"
+</script>
+<script type="text/ruby" section="s07" name="telop">
+$PROGRAM_NAME = "telop"
+# 追加のコード (your supplementary code here)
+def telop
+  max_frame = 60
+  screen_frame = 15
+  frame_now = frameCount - $telop_frame
+  if max_frame < frame_now
+    return
+  end
+  
+  noStroke
+  if frame_now <= screen_frame
+    fill("rgba(255, 255, 255, #{frame_now / screen_frame})")
+  elsif max_frame - screen_frame < frame_now
+    fill("rgba(255, 255, 255, #{1 - (frame_now - (max_frame - screen_frame)) / screen_frame})")
+  else
+    fill("white")
+  end
+  rectMode(CORNER)
+  rect(0, $size * 2.2, $size * 5, $size * 0.6)
+  
+  if frame_now <= screen_frame
+    fill("rgba(0, 0, 0, #{frame_now / screen_frame})")
+  elsif max_frame - screen_frame < frame_now
+    fill("rgba(0, 0, 0, #{1 - (frame_now - (max_frame - screen_frame)) / screen_frame})")
+  else
+    fill("black")
+  end
+  textSize($size * 0.4)
+  textAlign(CENTER, CENTER)
+  text($telop_text, $size * 2.5, $size * 2.5)
+end
+
+def put_telop(text)
+  $telop_text = text
+  $telop_frame = frameCount
+end
+
+$PROGRAM_NAME = "telop"
+</script>
+<script type="text/ruby" section="s06" name="win_judge">
+$PROGRAM_NAME = "win_judge"
+# 追加のコード (your supplementary code here)
+def win_judge
+  look_pattern = [[[1, 0], [2, 0]], [[1, -1], [2, -2]], [[1, 1], [2, 2]], [[0, 1], [0, 2]]]
+  
+  for i in 1..4 # プレイヤー
+    for y in 0...5
+      for x in 0...5
+        if $maps[y][x] != i
+          next
+        end
+        
+        for looks in look_pattern
+          can = true
+          for look in looks
+            lx, ly = x + look[0], y + look[1]
+            
+            if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly
+              can = false
+              break
+            end
+            
+            if $maps[ly][lx] != i
+              can = false
+              break
+            end
+          end
+          
+          if can
+            return i
+          end
+        end
+      end
+    end
+  end
+  
+  return 0
+end
+$PROGRAM_NAME = "win_judge"
+</script>
+<script type="text/ruby" section="s00" name="main">
+$PROGRAM_NAME = "main"
+# 初期設定用のコード (your setup code here)
+def setup
+  ww, wh = windowWidth - 10, windowHeight - 10
+  createCanvas(ww, wh)
+  $maps = [
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0]
+  ]
+  
+  $state = "stand by"
+  $turn = 1
+  $size = [ww / 5.0, wh / 5.0].min
+  $cx_real, $cy_real = 2, 2
+  $cx, $cy = 2, 2
+  $csize, $csize_real = 1, 1
+  $sx, $sy = 0, 0
+  $s_distance = 0
+  $selected = 0
+  $can_mouse_click = true
+  $moving_states = []
+  $maps_hozons = [0, 0]
+  $telop_text = ""
+  $telop_frame = -9999999
+end
+
+def next_turn()
+  $turn += 1
+  if $turn == 3
+    $turn = 1
+  end
+  
+  $maps_hozons.insert(0, deepcopy($maps))
+  $maps_hozons.pop
+  
+  judge = win_judge
+  
+  colors_for_human = ["白", "赤", "青", "緑", "黄"]
+  if judge != 0
+    put_telop(colors_for_human[judge] + "の勝ちです。")
+    $state = ""
+  end
+end
+
+def can_put_judge(sx, sy)
+  looks = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
+  for look in looks
+    lx, ly = sx + look[0], sy + look[1]
+    if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly
+      next
+    end
+    
+    if $maps[ly][lx] == $turn
+      return false
+    end
+  end
+  
+  coma_amount = 0
+  for y in 0...5
+    coma_amount += $maps[y].count($turn)
+  end
+  
+  if 5 <= coma_amount
+    return false
+  else
+    return true
+  end
+end
+
+# 画面描画用のコード (your draw code here)
+def draw
+  ww, wh = windowWidth - 10, windowHeight - 10
+  $size = [ww / 5.0, wh / 5.0].min
+  resizeCanvas(ww, wh)
+  background(220)
+  
+  $cx += ($cx_real - $cx) * 0.2
+  $cy += ($cy_real - $cy) * 0.2
+  $csize += ($csize_real - $csize) * 0.2
+  
+  colors = ["white", "rgb(255, 0, 0)", "rgb(0, 0, 255)", "rgb(0, 255, 0)", "rgb(255, 255, 0)"]
+  colors_bright = ["white", "rgb(255, 150, 150)", "rgb(150, 150, 255)", "rgb(150, 255, 150)", "rgb(255, 255, 150)"]
+  rectMode(CORNER)
+  for y in 0...5
+    for x in 0...5
+      fill("white")
+      
+      strokeWeight($size * 0.03)
+      stroke("black")
+      rect(x * $size, y * $size, $size, $size)
+      
+      strokeWeight($size * 0.01)
+      stroke("dimgray")
+      
+      baseX, baseY = (x + 0.5) * $size, (y + 0.5) * $size
+      
+      for i in 0...4
+        line(
+          baseX + Math.sin(Math.radians(i * 45)) * ($size * 0.45), 
+          baseY + Math.cos(Math.radians(i * 45)) * ($size * 0.45), 
+          baseX + Math.sin(Math.radians(i * 45 + 180)) * ($size * 0.45), 
+          baseY + Math.cos(Math.radians(i * 45 + 180)) * ($size * 0.45))
+      end
+      
+      if $maps[y][x] != 0
+        fill(colors[$maps[y][x]])
+        circle(baseX, baseY, $size * 0.8)
+      end
+    end
+  end
+  
+  case $state
+  when "stand by"
+    standby(colors, colors_bright)
+  when "putting"
+    putting(colors)
+  when "moving"
+    moving(colors)
+  end
+  
+  if not mouseIsPressed
+    $can_mouse_click = true
+  end
+  
+  telop()
+  $mouse_is_moved = false
+end
+
+def mouseMoved
+  $mouse_is_moved = true
+end
+
+$PROGRAM_NAME = "main"
+</script>
+
+</body>
+</html>
