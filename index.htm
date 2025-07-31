@@ -12,7 +12,7 @@
 <script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/opal/date.min.js" onload="Opal.load('date')"></script>
 <script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/p5/p5.min.js"></script>
 <script type="text/javascript" src="https://rbcanvas.net/p5/0.5.1/runtime/rbcanvasp5/rbcanvasp5.js"></script>
-<script type="text/ruby" section="s05" name="deepcopy">
+<script type="text/ruby" section="s01" name="deepcopy">
 $PROGRAM_NAME = "deepcopy"
 # 追加のコード (your supplementary code here)
 def deepcopy(array)
@@ -28,7 +28,7 @@ def deepcopy(array)
 end
 $PROGRAM_NAME = "deepcopy"
 </script>
-<script type="text/ruby" section="s04" name="moving">
+<script type="text/ruby" section="s02" name="moving">
 $PROGRAM_NAME = "moving"
 # 追加のコード (your supplementary code here)
 def moving(colors)
@@ -132,7 +132,7 @@ end
 
 $PROGRAM_NAME = "putting"
 </script>
-<script type="text/ruby" section="s02" name="standby">
+<script type="text/ruby" section="s04" name="standby">
 $PROGRAM_NAME = "standby"
 # 追加のコード (your supplementary code here)
 def standby(colors, colors_bright)
@@ -176,7 +176,7 @@ def standby(colors, colors_bright)
 end
 $PROGRAM_NAME = "standby"
 </script>
-<script type="text/ruby" section="s07" name="telop">
+<script type="text/ruby" section="s05" name="telop">
 $PROGRAM_NAME = "telop"
 # 追加のコード (your supplementary code here)
 def telop
@@ -286,11 +286,16 @@ def setup
   $maps_hozons = [0, 0]
   $telop_text = ""
   $telop_frame = -9999999
+  
+  $player = gets("プレイ人数(2~4)").to_i
+  if not (2 <= $player and $player <= 4)
+    raise "プレイ人数を2~4人で選んでください"
+  end
 end
 
 def next_turn()
   $turn += 1
-  if $turn == 3
+  if $turn == $player + 1
     $turn = 1
   end
   
