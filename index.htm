@@ -105,13 +105,9 @@ def putting(colors)
   end
   $s_distance += (50 - $s_distance) * 0.1
   
-  # カーソルが遠すぎたり近すぎたりするとキャンセル
+  # 近すぎたりするとキャンセル
   is_cancel_if_click = false
   if (mouseX - baseX).abs < $size * 0.5 and (mouseY - baseY).abs < $size * 0.5
-    $s_distance = 0
-    is_cancel_if_click = true
-  end
-  if (mouseX - baseX).abs > $size * 3 or (mouseY - baseY).abs > $size * 3
     $s_distance = 0
     is_cancel_if_click = true
   end
@@ -287,9 +283,11 @@ def setup
   $telop_text = ""
   $telop_frame = -9999999
   
+  $can_play = true
   $player = gets("プレイ人数(2~4)").to_i
   if not (2 <= $player and $player <= 4)
-    raise "プレイ人数を2~4人で選んでください"
+    print "プレイ人数を2~4人で選んでください"
+    $can_play = false
   end
 end
 
@@ -342,6 +340,10 @@ def draw
   $size = [ww / 5.0, wh / 5.0].min
   resizeCanvas(ww, wh)
   background(220)
+
+  if not $can_play
+    return
+  end
   
   $cx += ($cx_real - $cx) * 0.2
   $cy += ($cy_real - $cy) * 0.2
