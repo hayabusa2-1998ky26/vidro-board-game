@@ -195,7 +195,7 @@ def putting(colors)
   
   circle(baseX + Math.sin(Math.radians(angle)) * $s_distance, baseY + Math.cos(Math.radians(angle)) * $s_distance, $size * 0.8)
   
-  if mouseIsPressed and mouseButton == LEFT and $can_mouse_click
+  if $is_clicked
     if not is_cancel_if_click
       $moving_states = {coma: $turn, angle: angle, frame: frameCount}
       $state = "moving"
@@ -203,7 +203,6 @@ def putting(colors)
       $maps[$sy][$sx] = $turn
       $state = "stand by"
     end
-    $can_mouse_click = false
   end
 end
 
