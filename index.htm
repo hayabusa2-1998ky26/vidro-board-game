@@ -591,7 +591,7 @@ def draw
   $ex = [(ww - wh) * 0.5, 0].max
   $ey = [(wh - ww) * 0.5, 0].max
   
-  if mouseIsPressed and mouseButton == LEFT and $can_mouse_click
+  if mouseIsPressed and $can_mouse_click
     $is_clicked = true
     $can_mouse_click = false
   end
