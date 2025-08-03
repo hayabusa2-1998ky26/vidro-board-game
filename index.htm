@@ -84,7 +84,7 @@ def deepcopy(array)
 end
 $PROGRAM_NAME = "deepcopy"
 </script>
-<script type="text/ruby" section="s10" name="how to play">
+<script type="text/ruby" section="s03" name="how to play">
 $PROGRAM_NAME = "how to play"
 # 追加のコード (your supplementary code here)
 def how_to_play
@@ -109,7 +109,7 @@ end
 
 $PROGRAM_NAME = "how to play"
 </script>
-<script type="text/ruby" section="s03" name="moving">
+<script type="text/ruby" section="s04" name="moving">
 $PROGRAM_NAME = "moving"
 # 追加のコード (your supplementary code here)
 def moving(colors)
@@ -156,11 +156,18 @@ def moving(colors)
 end
 $PROGRAM_NAME = "moving"
 </script>
-<script type="text/ruby" section="s04" name="putting">
+<script type="text/ruby" section="s05" name="putting">
 $PROGRAM_NAME = "putting"
 # 追加のコード (your supplementary code here)
 def putting(colors)
   $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
+  
+  cx, cy = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
+  $is_cursol_reaction = true
+  if mouseX < $ex or 4 < cx or mouseY < $ey or 4 < cy
+    $is_cursol_reaction = false
+  end
+  
   noFill
   stroke(colors[$turn])
   strokeWeight($size * 0.07)
@@ -188,18 +195,20 @@ def putting(colors)
   
   # 近すぎたりするとキャンセル
   is_cancel_if_click = false
-  if (mouseX - baseX).abs < $size * 0.5 and (mouseY - baseY).abs < $size * 0.5
+  if (mouseX - baseX).abs < $size * 0.5 and (mouseY - baseY).abs < $size * 0.5 or ($is_cursol_reaction != true)
     $s_distance = 0
     is_cancel_if_click = true
   end
   
   circle(baseX + Math.sin(Math.radians(angle)) * $s_distance, baseY + Math.cos(Math.radians(angle)) * $s_distance, $size * 0.8)
   
-  if $is_clicked
-    if not is_cancel_if_click
+  if not is_cancel_if_click
+    if $is_clicked and $is_cursol_reaction
       $moving_states = {coma: $turn, angle: angle, frame: frameCount}
       $state = "moving"
-    else
+    end
+  else
+    if $is_clicked
       $maps[$sy][$sx] = $turn
       $state = "stand by"
     end
@@ -208,12 +217,64 @@ end
 
 $PROGRAM_NAME = "putting"
 </script>
-<script type="text/ruby" section="s05" name="standby">
+<script type="text/ruby" section="s11" name="screen info about match">
+$PROGRAM_NAME = "screen info about match"
+# 追加のコード (your supplementary code here)
+def screen_info_about_match
+  textAlign(LEFT, TOP)
+  textSize($size * 0.3)
+  noStroke
+  fill("black")
+  text("#{((Time.now - $timer) / 60).to_i}分 #{(Time.now - $timer).to_i % 60}秒経過", $ex + $size * 0.3, $ey + $size * 5.3)
+  
+  if $state == "moving" or $state == "putting"
+    $reset_button.deactivate
+    $toryo_button.deactivate
+  else
+    $reset_button.activate
+    $toryo_button.activate
+  end
+  
+  if $state == "won"
+    put_sentence = ""
+    if $judge.length == $player
+      put_sentence = "引き分け"
+    else
+      colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
+      for color in $judge
+        put_sentence = put_sentence + colors_for_human[color] + "と"
+      end
+      put_sentence = put_sentence[0...-1] + "の勝ち"
+    end
+    textAlign(RIGHT, TOP)
+    text(put_sentence, $ex + $size * 5, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
+  end
+  
+  $reset_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 2, $size * 0.3 * 1.25)
+  if $player == 2 and $state != "won"
+    $toryo_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
+  end
+  
+end
+
+$PROGRAM_NAME = "screen info about match"
+</script>
+<script type="text/ruby" section="s06" name="standby">
 $PROGRAM_NAME = "standby"
 # 追加のコード (your supplementary code here)
 def standby(colors, colors_bright)
   $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
-  $cx_real, $cy_real = [[((mouseX - $ex) / $size.to_f).to_i, 0].max, 4].min, [[((mouseY - $ey) / $size.to_f).to_i, 0].max, 4].min #/
+  
+  cx, cy = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
+  if mouseX < $ex or 4 < cx or mouseY < $ey or 4 < cy
+    $is_cursol_reaction = false
+  else
+    $is_cursol_reaction = true
+  end
+  
+  if $is_cursol_reaction
+    $cx_real, $cy_real = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
+  end
   
   noFill
   stroke(colors_bright[$turn])
@@ -223,7 +284,7 @@ def standby(colors, colors_bright)
     $ex + ($cx - $csize) * $size, $ey + ($cy - $csize) * $size, 
     $ex + ($cx + 1 + $csize) * $size, $ey + ($cy + 1 + $csize) * $size)
   
-  if $is_clicked
+  if $is_clicked and $is_cursol_reaction
     $sx, $sy = $cx_real, $cy_real
     can_put = can_put_judge($sx, $sy)
     
@@ -249,7 +310,7 @@ def standby(colors, colors_bright)
 end
 $PROGRAM_NAME = "standby"
 </script>
-<script type="text/ruby" section="s06" name="start">
+<script type="text/ruby" section="s07" name="start">
 $PROGRAM_NAME = "start"
 # 追加のコード (your supplementary code here)
 def start(can_click=true)
@@ -323,6 +384,8 @@ class Button
   end
   
   def put(x, y, width, height)
+    rectMode(CORNER)
+    
     case @button_type
     when "left arrow"
       fill("black")
@@ -404,7 +467,7 @@ end
 
 $PROGRAM_NAME = "start"
 </script>
-<script type="text/ruby" section="s07" name="telop">
+<script type="text/ruby" section="s08" name="telop">
 $PROGRAM_NAME = "telop"
 # 追加のコード (your supplementary code here)
 def telop
@@ -445,11 +508,12 @@ end
 
 $PROGRAM_NAME = "telop"
 </script>
-<script type="text/ruby" section="s08" name="win_judge">
+<script type="text/ruby" section="s09" name="win_judge">
 $PROGRAM_NAME = "win_judge"
 # 追加のコード (your supplementary code here)
 def win_judge
   look_pattern = [[[1, 0], [2, 0]], [[1, -1], [2, -2]], [[1, 1], [2, 2]], [[0, 1], [0, 2]]]
+  winners = []
   
   for i in 1..4 # プレイヤー
     for y in 0...5
@@ -475,14 +539,14 @@ def win_judge
           end
           
           if can
-            return i
+            winners.push(i)
           end
         end
       end
     end
   end
   
-  return 0
+  return winners
 end
 $PROGRAM_NAME = "win_judge"
 </script>
@@ -519,6 +583,9 @@ def setup
   $num_size = 0.6
   $leave = false
   $ex, $ey = 0, 0
+  $is_cursol_screen = true
+  $timer = Time.now()
+  $judge = []
   
   $info_img = loadImage("info.jpeg")
   $back_ground_img = loadImage("back ground.jpeg")
@@ -526,11 +593,13 @@ def setup
   $right_button = Button.new("right arrow", lambda {$player, $num_size = $player + 1, 0.4 if $player < 4})
   $credit_button = Button.new("sentence", lambda {$state == "credit" ? $state = "start" : $state = "credit"}, "Credit")
   $howto_button = Button.new("sentence", lambda {$state == "how to play" ? $state = "start" : $state = "how to play"}, "How to play")
-  $play_button = Button.new("sentence", lambda {$state = "stand by"}, "PLAY")
+  $play_button = Button.new("sentence", lambda {$state, $timer = "stand by", Time.now}, "PLAY")
   $leave_button = Button.new("leave", lambda {$leave = true})
+  $reset_button = Button.new("sentence", lambda {return_tittle}, "タイトルに戻る")
+  $toryo_button = Button.new("sentence", lambda {toryo}, "投了する")
 end
 
-def next_turn()
+def next_turn
   $turn += 1
   if $turn == $player + 1
     $turn = 1
@@ -539,13 +608,47 @@ def next_turn()
   $maps_hozons.insert(0, deepcopy($maps))
   $maps_hozons.pop
   
-  judge = win_judge
+  $judge = win_judge
   
-  colors_for_human = ["白", "赤", "青", "緑", "黄"]
-  if judge != 0
-    put_telop(colors_for_human[judge] + "色の勝ちです")
-    $state = ""
+  if $judge != []
+    put_sentence = ""
+    if $judge.length == $player
+      put_sentence = "引き分けです"
+    else
+      colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
+      for color in $judge
+        put_sentence = put_sentence + colors_for_human[color] + "と"
+      end
+      put_sentence = put_sentence[0...-1] + "の勝ちです"
+      
+    end
+    put_telop(put_sentence)
+    $state = "won"
   end
+end
+
+def return_tittle
+  $maps = [
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0]
+  ]
+  $state = "start"
+  $turn = 1
+end
+
+def toryo
+  $turn += 1
+  if $turn == $player + 1
+    $turn = 1
+  end
+  
+  colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
+  put_telop("#{colors_for_human[$turn]}の勝ちです")
+  $judge = [$turn]
+  $state = "won"
 end
 
 def can_put_judge(sx, sy)
@@ -600,7 +703,6 @@ def draw
     image($back_ground_img, 0, 0, ww, i_h * (ww / i_w))
   else
     image($back_ground_img, 0, 0, i_w * (wh / i_h), wh)
-    
   end
   
   case $state
@@ -620,9 +722,19 @@ def draw
     return
   end
   
-  $cx += ($cx_real - $cx) * 0.2
-  $cy += ($cy_real - $cy) * 0.2
-  $csize += ($csize_real - $csize) * 0.2
+  noStroke
+  fill("aliceblue")
+  rectMode(CORNER)
+  rect($ex, $ey, $size * 5, $size * 5)
+  
+  if $is_cursol_screen
+    $cx += ($cx_real - $cx) * 0.2
+    $cy += ($cy_real - $cy) * 0.2
+    $csize += ($csize_real - $csize) * 0.2
+  end
+  
+  $ex += $size * 0.5
+  $size *= 0.8
   
   colors = ["white", "rgb(255, 0, 0)", "rgb(0, 0, 255)", "rgb(0, 255, 0)", "rgb(255, 255, 0)"]
   colors_bright = ["white", "rgb(255, 150, 150)", "rgb(150, 150, 255)", "rgb(150, 255, 150)", "rgb(255, 255, 150)"]
@@ -663,6 +775,8 @@ def draw
   when "moving"
     moving(colors)
   end
+  
+  screen_info_about_match
   
   reset
 end
