@@ -47,17 +47,48 @@ StoreImage.createImage('ボドゲ部.jpeg', 1280, 499, 'data:image/jpeg;base64,/
 $PROGRAM_NAME = "credit"
 # 追加のコード (your supplementary code here)
 def credit
+  # リンクを表示
+  screen_link
+  set_link_position($ex + $size * 2.14, $ey + $size * 2.22, $size * 0.175)
+  
+  # クレジットの背景を描画
   fill("white")
   strokeWeight($size * 0.01)
   stroke("black")
   rect($ex + $size, $ey + $size, $size * 3, $size * 3)
   
+  # 説明を描画
+  textAlign(LEFT, TOP)
+  textSize($size * 0.175)
+  fill("black")
+  noStroke
+  text(
+"＜ゲームルール制作＞
+芝浦工業大学付属中学高等学校
+思考ゲーム愛好会
+ゲームデザイン：笠置啓太
+制作：2022/09/28
+愛好会HP：
+
+
+
+＜プログラム制作＞
+芝浦工業大学付属中学高等学校
+プログラムデザイン：入江大輝
+制作：2025/08/03
+", $ex + $size * 1.1, $ey + $size * 1.1)
+  
+  # バツ印を設置
   c_x, c_y = $size * 4, $size
   c_size = $size * 0.2
   $leave_button.put($ex + c_x - c_size, $ey + c_y - c_size, c_size * 2, c_size * 2)
   
-  # text()
+  # ボドゲブの画像を描画
+  i_w, i_h = $bodogebu_img.width.to_f, $bodogebu_img.height.to_f
+  blank = $size * 0.1
+  image($bodogebu_img, $ex + $size * 2.5 - blank, $ey + $size * 3.15 - i_h * (($size * 1.5) / i_w) - blank, $size * 1.5, i_h * (($size * 1.5) / i_w))
   
+  # バツ印が押されたら
   if $leave == true
     $leave = false
     $state = "start"
@@ -71,7 +102,7 @@ $PROGRAM_NAME = "credit"
 <script type="text/ruby" section="s02" name="deepcopy">
 $PROGRAM_NAME = "deepcopy"
 # 追加のコード (your supplementary code here)
-def deepcopy(array)
+def deepcopy(array) # 盤面をディープコピー
   list = []
   for y in 0...5
     list.push([])
@@ -88,23 +119,248 @@ $PROGRAM_NAME = "deepcopy"
 $PROGRAM_NAME = "how to play"
 # 追加のコード (your supplementary code here)
 def how_to_play
+  # 遊び方の背景を描画
   fill("white")
   strokeWeight($size * 0.01)
   stroke("black")
-  rect($ex + $size, $ey + $size, $size * 3, $size * 3)
+  rect($ex + $size* 0.5, $ey + $size, $size * 4, $size * 3)
   
-  c_x, c_y = $size * 4, $size
+  # バツ印を設置
+  c_x, c_y = $size * 4.5, $size
   c_size = $size * 0.2
   $leave_button.put($ex + c_x - c_size, $ey + c_y - c_size, c_size * 2, c_size * 2)
   
-  # text()
+  # 左右に移動ボタンを設置
+  $howto_left_button.put($ex + $size * 0.55, $ey + $size * (2.5 - 0.25), $size * 0.2, $size * 0.5)
+  $howto_right_button.put($ex + $size * (4.45 - 0.2), $ey + $size * (2.5 - 0.25), $size * 0.2, $size * 0.5)
   
+  # バツ印が押されたら
   if $leave == true
     $leave = false
     $state = "start"
   end
   
+  $howto_frame += 1
+  
+  case $howto_state
+  when 0
+    howto_tittle("ゲーム概要")
+    howto_explain("おはじきを使った三目並べです。\n・置ける場所に制限があります。\n・おはじきを弾くことができます。\n・縦横斜いずれかの方向におはじきが\n  3つ並んだプレイヤーの勝利となります。")
+    
+    # 3連コマを描画
+    fill("blue")
+    noStroke
+    circle($ex + $size * 2.2, $ey + $size * 3, $size * 0.35)
+    circle($ex + $size * 2.5, $ey + $size * 3.3, $size * 0.35)
+    circle($ex + $size * 2.8, $ey + $size * 3.6, $size * 0.35)
+    
+    # 点線を描画
+    stroke("chocolate")
+    strokeWeight($size * 0.03)
+    baseX = $ex + $size * (2.2 - 0.35 / 2)
+    baseY = $ey + $size * (3 - 0.35 / 2)
+    one_distance = $size * 0.073
+    one_blank = $size * 0.073
+    for i in 0...[$howto_frame / 15, 7].min.to_i
+      one_long = (one_distance + one_blank) * i
+      line(baseX + one_long, baseY + one_long, baseX + one_long + one_distance, baseY + one_long + one_distance)
+    end
+    
+    # 180フレームごとにリセット
+    if $howto_frame == 180
+      $howto_frame = 0
+    end
+    
+  when 1
+    howto_tittle("ゲーム準備")
+    howto_explain("・各プレイヤーは1色5個おはじきをもちます。\n・スタートプレイヤーは一番最近ガラス製品に\n  触れた人です。")
+    
+  when 2
+    howto_tittle("ルール1")
+    howto_explain("順に手番が進みます。\n各手番にできることは\n次の二つのうち1つだけです\n\n#{1}.手持ちのおはじきを任意の場所に置きます。\nただし既に置かれている\n自分のおはじきの周囲\n1マスにはおはじきを\n置くことができません。")
+    
+    # 仮想盤面を描画
+    baseX, baseY = $ex + $size * 2.7, $ey + $size * 2.7
+    endX, endY = $ex + $size * 3.9, $ey + $size * 3.9
+    one = (endX - baseX) / 4
+    batsus = [[0, 1], [1, 1], [2, 1], [2, 2], [2, 3], [1, 3], [0, 3], [0, 2]]
+    screen_batsus = batsus[0...[$howto_frame / 13, 8].min.to_i]
+    for y in 0...4
+      for x in 0...4
+        # マス目を描画
+        fill("white")
+        stroke("black")
+        strokeWeight($size * 0.01)
+        rect(baseX + one * x, baseY + one * y, one, one)
+        
+        if batsus.include?([x, y])
+          # バツ印を描画
+          if screen_batsus.include?([x, y])
+            stroke("red")
+            strokeWeight($size * 0.03)
+            line(baseX + one * (x + 0.2), baseY + one * (y + 0.2), baseX + one * (x + 0.8), baseY + one * (y + 0.8))
+            line(baseX + one * (x + 0.2), baseY + one * (y + 0.8), baseX + one * (x + 0.8), baseY + one * (y + 0.2))
+          end
+        elsif[x, y] == [1, 2]
+          # もともとあるコマを描画
+          fill("blue")
+          noStroke
+          circle(baseX + one * (x + 0.5), baseY + one * (y + 0.5), one * 0.8)
+        else
+          # 置けるコマを描画
+          fill("lightblue")
+          noStroke
+          circle(baseX + one * (x + 0.5), baseY + one * (y + 0.5), one * 0.8)
+        end
+      end
+    end
+    
+    # 180フレームごとにリセット
+    if $howto_frame == 180
+      $howto_frame = 0
+    end
+    
+  when 3
+    howto_tittle("ルール1")
+    howto_explain("2.既に置かれた自分のおはじきを縦、横、斜め\nの任意の方向へ弾くことができます。\nこのときおはじきは摩擦を無視して滑り続け、\n壁に当たるまで止まりません。")
+    
+    # 仮想盤面を描画
+    baseX, baseY = $ex + $size * 0.9, $ey + $size * 2.5
+    endX, endY = $ex + $size * 2.3, $ey + $size * 3.9
+    baseX2, baseY2 = $ex + $size * 2.7, $ey + $size * 2.5
+    endX2, endY2 = $ex + $size * 4.1, $ey + $size * 3.9
+    one = (endX - baseX) / 4
+    for y in 0...4
+      for x in 0...4
+        # マス目を描画
+        fill("white")
+        stroke("black")
+        strokeWeight($size * 0.01)
+        rect(baseX + one * x, baseY + one * y, one, one)
+        rect(baseX2 + one * x, baseY2 + one * y, one, one)
+      end
+    end
+    
+    progress = [[($howto_frame - 60) / 60, 1].min, 0].max
+    
+    # コマを描画
+    fill("blue")
+    noStroke
+    circle(baseX + one * 2.5 - one * 2 * progress, baseY + one * 3.5 - one * 2 * progress, one * 0.8)
+    circle(baseX2 + one * 1.5 + one * 2 * progress, baseY2 + one * 0.5, one * 0.8)
+    
+    # 矢印を描画
+    draw_yajirusi([[2.5, 3.5, 215, 1], [1.5, 0.5, 0, 2]], baseX, baseY, baseX2, baseY2, one)
+    
+    # 180フレームごとにリセット
+    if $howto_frame == 180
+      $howto_frame = 0
+    end
+        
+  when 4
+    howto_tittle("ルール2")
+    howto_explain("また、他のおはじきにぶつかったとき、\n運動エネルギーが移行して、弾かれます。")
+    
+    # 仮想盤面を描画
+    baseX, baseY = $ex + $size * 0.9, $ey + $size * 2.5
+    endX, endY = $ex + $size * 2.3, $ey + $size * 3.9
+    baseX2, baseY2 = $ex + $size * 2.7, $ey + $size * 2.5
+    endX2, endY2 = $ex + $size * 4.1, $ey + $size * 3.9
+    one = (endX - baseX) / 4
+    for y in 0...4
+      for x in 0...4
+        # マス目を描画
+        fill("white")
+        stroke("black")
+        strokeWeight($size * 0.01)
+        rect(baseX + one * x, baseY + one * y, one, one)
+        rect(baseX2 + one * x, baseY2 + one * y, one, one)
+      end
+    end
+    
+    progress_0_2 = [[($howto_frame - 60) / 60, 1].min, 0].max # 最初から最後まで
+    progress_0_1 = [[($howto_frame - 60) / 30, 1].min, 0].max # 最初から途中まで
+    progress_1_2 = [[($howto_frame - 90) / 30, 1].min, 0].max # 途中から最後まで
+    
+    # コマを描画
+    fill("blue")
+    noStroke
+    circle(baseX + one * 0.5, baseY + one * 0.5, one * 0.8)
+    circle(baseX + one * 0.5 + one * progress_0_1, baseY + one * 2.5, one * 0.8)
+    circle(baseX2 + one * 2.5, baseY2 + one * 0.5, one * 0.8)
+    circle(baseX2 + one * 3.5, baseY2 + one * 0.5 + one * 2 * progress_0_2, one * 0.8)
+    
+    fill("green")
+    noStroke
+    circle(baseX + one * 1.5 + one * 2 * progress_0_2, baseY + one * 0.5, one * 0.8)
+    circle(baseX + one * 2.5 + one * progress_1_2, baseY + one * 2.5, one * 0.8)
+    circle(baseX2 + one * 1.5 - one * progress_0_1, baseY2 + one * 1.5 + one * progress_0_1, one * 0.8)
+    circle(baseX2 + one * 3.5, baseY2 + one * 3.5, one * 0.8)
+    
+    # 矢印を描画
+    draw_yajirusi([[0.5, 0.5, 0, 1], [0.5, 2.5, 0, 1], [3.5, 0.5, 90, 2], [2.5, 0.5, 135, 2]], baseX, baseY, baseX2, baseY2, one)
+    
+    # 180フレームごとにリセット
+    if $howto_frame == 180
+      $howto_frame = 0
+    end
+    
+  when 5
+    howto_tittle("注意事項")
+    howto_explain("・次の手で勝てるとき「リーチ」を宣言して\n  ください。(2人でプレイする場合)\n\n・千日手(一つ前の盤面と同じになる手)は禁止\n  です。千日手が起こったときには、別の手を\n  行ってください。\n\n・弾き終わった状態で列がそろっていなければ\n  勝利条件は満たしません。")
+  end
+  
   $is_clicked = false
+end
+
+def howto_tittle(sentence)
+  strokeWeight($size * 0.01)
+  stroke("black")
+  fill("chocolate")
+  rect($ex + $size * 0.8, $ey + $size * 1.1, $size * 2, $size * 0.4)
+  
+  textSize($size * 0.3)
+  textAlign(CENTER, CENTER)
+  fill("white")
+  noStroke
+  text(sentence, $ex + $size * 1.8, $ey + $size * 1.3)
+end
+
+def howto_explain(sentence)
+  textSize($size * 0.16)
+  textAlign(LEFT, TOP)
+  fill("black")
+  noStroke
+  text(sentence, $ex + $size * 0.8, $ey + $size * 1.6)
+end
+
+def draw_yajirusi(triangles, baseX, baseY, baseX2, baseY2, one)
+  if $howto_frame <= 45
+    for i in 0...triangles.length
+      x, y, angle, kaso_banmen = triangles[i]
+      triangle_base = [(x + 0.25), (y - 0.25), (x + 0.25), (y + 0.25), (x + 0.75), (y)]
+      triangle_one = []
+      angle += 180
+      
+      for base in 0...3
+        bx, by = triangle_base[base * 2], triangle_base[base * 2 + 1]
+        dx, dy = x - bx, y - by
+        circle_r = Math.sqrt(dx ** 2 + dy ** 2)
+        sin_a, cos_a = dy / circle_r, dx / circle_r
+        ax = circle_r * (cos_a * Math.cos(Math.radians(angle)) - sin_a * Math.sin(Math.radians(angle)))
+        ay = circle_r * (sin_a * Math.cos(Math.radians(angle)) + cos_a * Math.sin(Math.radians(angle)))
+        
+        if kaso_banmen == 1
+          triangle_one.push(baseX + (ax + x) * one, baseY + (ay + y) * one)
+        else
+          triangle_one.push(baseX2 + (ax + x) * one, baseY2 + (ay + y) * one)
+        end
+      end
+      
+      fill("chocolate")
+      triangle(*triangle_one)
+    end
+  end
 end
 
 $PROGRAM_NAME = "how to play"
@@ -113,20 +369,22 @@ $PROGRAM_NAME = "how to play"
 $PROGRAM_NAME = "moving"
 # 追加のコード (your supplementary code here)
 def moving(colors)
+  # 1マスの移動に必要なフレーム数
   need_frame = 20
   
+  # 動いているコマを描画
   angles = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]]
   direction = angles[$moving_states[:angle] / 45]
   frame_now = frameCount - $moving_states[:frame] - 1
-  
   baseX, baseY = $ex + ($sx + 0.5) * $size, $ey + ($sy + 0.5) * $size
   fill(colors[$moving_states[:coma]])
+  noStroke
   circle(baseX + direction[0] * $size * frame_now / need_frame, baseY + direction[1] * $size * frame_now / need_frame, $size * 0.8)
   
   lx = $sx + direction[0]
   ly = $sy + direction[1]
   if frame_now == 0
-    if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly
+    if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly # 盤面の端に到達したら
       $maps[$sy][$sx] = $moving_states[:coma]
       $state = "stand by"
       
@@ -139,8 +397,8 @@ def moving(colors)
         next_turn
       end
     else
-      if $maps[ly][lx] != 0
-        $maps[$sy][$sx] = $moving_states[:coma]
+      if $maps[ly][lx] != 0 # 進んだ先にコマがあれば
+        $maps[$sy][$sx] = $moving_states[:coma] # 動かすコマを交換
         $moving_states[:coma] = $maps[ly][lx]
         $sx, $sy = lx, ly
         $maps[$sy][$sx] = 0
@@ -156,18 +414,151 @@ def moving(colors)
 end
 $PROGRAM_NAME = "moving"
 </script>
-<script type="text/ruby" section="s05" name="putting">
-$PROGRAM_NAME = "putting"
+<script type="text/ruby" section="s05" name="other defines">
+$PROGRAM_NAME = "other defines"
 # 追加のコード (your supplementary code here)
-def putting(colors)
-  $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
-  
-  cx, cy = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
-  $is_cursol_reaction = true
-  if mouseX < $ex or 4 < cx or mouseY < $ey or 4 < cy
-    $is_cursol_reaction = false
+
+def next_turn
+  # 次のターンにする
+  $turn += 1
+  if $turn == $player + 1
+    $turn = 1
   end
   
+  # 千日手防止の盤面保存
+  $maps_hozons.insert(0, deepcopy($maps))
+  $maps_hozons.pop
+  
+  $judge = win_judge
+  
+  if $judge != [] # 勝者がいるなら
+    put_sentence = ""
+    if $judge.length == $player
+      put_sentence = "引き分けです"
+    else
+      colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
+      for color in $judge
+        put_sentence = put_sentence + colors_for_human[color] + "と"
+      end
+      put_sentence = put_sentence[0...-1] + "の勝ちです"
+      
+    end
+    put_telop(put_sentence)
+    $state = "won"
+  end
+end
+
+
+def return_tittle
+  # 盤面を空白にする
+  $maps = [
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0], 
+    [0, 0, 0, 0, 0]
+  ]
+  $state = "start"
+  $turn = 1
+  $really_ask_state = "normal"
+end
+
+
+def toryo
+  # 次のターンの人を勝ちにする
+  $turn += 1
+  if $turn == $player + 1
+    $turn = 1
+  end
+  
+  colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
+  put_telop("#{colors_for_human[$turn]}の勝ちです")
+  $judge = [$turn]
+  $state = "won"
+  $really_ask_state = "normal"
+end
+
+
+def can_put_judge(sx, sy) # 置いたコマが置けるかどうか判定
+  # 周囲8マスに置かれていないか
+  looks = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
+  for look in looks
+    lx, ly = sx + look[0], sy + look[1]
+    if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly
+      next
+    end
+    
+    if $maps[ly][lx] == $turn
+      return false
+    end
+  end
+  
+  # 既に5個コマが置かれていないか
+  coma_amount = 0
+  for y in 0...5
+    coma_amount += $maps[y].count($turn)
+  end
+  
+  if 5 <= coma_amount
+    return false
+  else
+    return true
+  end
+end
+
+# 状態をクリーンアップ
+def reset
+  if not mouseIsPressed
+    $can_mouse_click = true
+  end
+  
+  telop()
+  $is_clicked = false
+  
+  # fps算出
+  $frame_count += 1
+  if Time.now - $when_start_frame_count > 1
+    $when_start_frame_count = Time.now
+    $frame_rate = $frame_count
+    $frame_count = 0
+  end
+  
+  # fps表示
+  ww, wh = windowWidth - 10, windowHeight - 10
+  $size = [ww / 5.0, wh / 5.0].min
+  $ex = [(ww - wh) * 0.5, 0].max
+  $ey = [(wh - ww) * 0.5, 0].max
+  textSize($size * 0.08)
+  fill("green")
+  noStroke
+  textAlign(RIGHT, BOTTOM)
+  text("#{$frame_rate.to_i}fps", $ex + $size * 5, $ey + $size * 5)
+  
+  # デバッグ情報を表示
+  debug
+end
+
+def debug
+  if key == "z"
+    fill("black")
+    noStroke
+    textSize($size * 0.3)
+    textAlign(LEFT, TOP)
+    text("mouseX: #{(mouseX - $ex) / $size.to_f}\nmouseY: #{(mouseY - $ey) / $size.to_f}\n", 0, 0)
+  end
+end
+
+
+$PROGRAM_NAME = "other defines"
+</script>
+<script type="text/ruby" section="s06" name="putting">
+$PROGRAM_NAME = "putting"
+# 追加のコード (your supplementary code here)
+def putting(colors) # コマを長押し中
+  # カーソルのサイズをゆらゆらさせる
+  $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
+  
+  # カーソルを描画
   noFill
   stroke(colors[$turn])
   strokeWeight($size * 0.07)
@@ -175,10 +566,9 @@ def putting(colors)
   rect(
     $ex + ($cx - $csize) * $size, $ey + ($cy - $csize) * $size, 
     $ex + ($cx + 1 + $csize) * $size, $ey + ($cy + 1 + $csize) * $size)
-    
+  
+  # 選択中のコマに対して、マウスカーソルがどの方向にあるか8分割
   baseX, baseY = $ex + ($sx + 0.5) * $size, $ey + ($sy + 0.5) * $size
-  fill(colors[$turn])
-  noStroke
   angle = round(Math.degrees(Math.atan((mouseX - baseX) / (mouseY - baseY))) / 45.0) * 45
   if mouseY - baseY < 0
     angle += 180
@@ -187,28 +577,34 @@ def putting(colors)
   if angle == -90
     angle = 270
   end
-
+  
+  # 40フレームごとにコマの挙動を戻す
   if frameCount % 40 == 0
     $s_distance = 0
   end
   $s_distance += (50 - $s_distance) * 0.1
   
-  # 近すぎたりするとキャンセル
+  # マウスカーソルが近すぎるとキャンセル
   is_cancel_if_click = false
-  if (mouseX - baseX).abs < $size * 0.5 and (mouseY - baseY).abs < $size * 0.5 or ($is_cursol_reaction != true)
+  if (mouseX - baseX).abs < $size * 0.5 and (mouseY - baseY).abs < $size * 0.5
     $s_distance = 0
     is_cancel_if_click = true
   end
   
+  # コマを描画
+  fill(colors[$turn])
+  noStroke
   circle(baseX + Math.sin(Math.radians(angle)) * $s_distance, baseY + Math.cos(Math.radians(angle)) * $s_distance, $size * 0.8)
   
   if not is_cancel_if_click
-    if $is_clicked and $is_cursol_reaction
+    # マウスカーソルがコマから離れた状態でクリックが離されたらコマの移動状態にする
+    if (mouseIsPressed != true)
       $moving_states = {coma: $turn, angle: angle, frame: frameCount}
       $state = "moving"
     end
   else
-    if $is_clicked
+    # マウスカーソルがコマに近すぎる状態でクリックが離されたら待機状態にする
+    if not mouseIsPressed
       $maps[$sy][$sx] = $turn
       $state = "stand by"
     end
@@ -217,16 +613,23 @@ end
 
 $PROGRAM_NAME = "putting"
 </script>
-<script type="text/ruby" section="s11" name="screen info about match">
+<script type="text/ruby" section="s07" name="screen info about match">
 $PROGRAM_NAME = "screen info about match"
 # 追加のコード (your supplementary code here)
 def screen_info_about_match
+  # 決着がついていないなら経過時間を更新
+  if $state != "won"
+    $stopped_timer = Time.now
+  end
+  
+  # 経過時間を描画
   textAlign(LEFT, TOP)
-  textSize($size * 0.3)
+  textSize($size * 0.26)
   noStroke
   fill("black")
-  text("#{((Time.now - $timer) / 60).to_i}分 #{(Time.now - $timer).to_i % 60}秒経過", $ex + $size * 0.3, $ey + $size * 5.3)
+  text("#{(($stopped_timer - $timer) / 60).to_i}分 #{($stopped_timer - $timer).to_i % 60}秒経過", $ex, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
   
+  # 行動中ならボタンを無効化
   if $state == "moving" or $state == "putting"
     $reset_button.deactivate
     $toryo_button.deactivate
@@ -235,6 +638,7 @@ def screen_info_about_match
     $toryo_button.activate
   end
   
+  # 勝敗を描画
   if $state == "won"
     put_sentence = ""
     if $judge.length == $player
@@ -242,29 +646,42 @@ def screen_info_about_match
     else
       colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
       for color in $judge
-        put_sentence = put_sentence + colors_for_human[color] + "と"
+        put_sentence = put_sentence + colors_for_human[color] + "/"
       end
       put_sentence = put_sentence[0...-1] + "の勝ち"
     end
+    text(put_sentence, $ex, $ey + $size * (5 - 0.3 - 0.1) * 1.25)
+  end
+  
+  case $really_ask_state
+  when "normal" # 元の状態
+    $reset_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 2, $size * 0.3 * 1.25)
+    if $player == 2 and $state != "won"
+      $toryo_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
+    end
+  when "reset" # "タイトルに戻る"が押されたとき
     textAlign(RIGHT, TOP)
-    text(put_sentence, $ex + $size * 5, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
+    text("本当に戻りますか？", $ex + $size * 5, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
+    $reset_yes_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
+    $reset_no_button.put($ex + $size * (5 - 0.9), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
+  when "toryo" # "投了する"が押されたとき
+    textAlign(RIGHT, TOP)
+    text("本当に投了しますか？", $ex + $size * 5, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
+    $toryo_yes_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
+    $toryo_no_button.put($ex + $size * (5 - 0.9), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
   end
-  
-  $reset_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 2, $size * 0.3 * 1.25)
-  if $player == 2 and $state != "won"
-    $toryo_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
-  end
-  
 end
 
 $PROGRAM_NAME = "screen info about match"
 </script>
-<script type="text/ruby" section="s06" name="standby">
+<script type="text/ruby" section="s08" name="standby">
 $PROGRAM_NAME = "standby"
 # 追加のコード (your supplementary code here)
-def standby(colors, colors_bright)
+def standby(colors, colors_bright) # コマの行動待機
+  # カーソルのサイズをゆらゆらさせる
   $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
   
+  # もしマウスカーソルが盤面外ならカーソルの動きを止める
   cx, cy = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
   if mouseX < $ex or 4 < cx or mouseY < $ey or 4 < cy
     $is_cursol_reaction = false
@@ -276,6 +693,7 @@ def standby(colors, colors_bright)
     $cx_real, $cy_real = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
   end
   
+  # カーソルを表示
   noFill
   stroke(colors_bright[$turn])
   strokeWeight($size * 0.07)
@@ -284,6 +702,7 @@ def standby(colors, colors_bright)
     $ex + ($cx - $csize) * $size, $ey + ($cy - $csize) * $size, 
     $ex + ($cx + 1 + $csize) * $size, $ey + ($cy + 1 + $csize) * $size)
   
+  # クリックされたときの処理
   if $is_clicked and $is_cursol_reaction
     $sx, $sy = $cx_real, $cy_real
     can_put = can_put_judge($sx, $sy)
@@ -310,10 +729,11 @@ def standby(colors, colors_bright)
 end
 $PROGRAM_NAME = "standby"
 </script>
-<script type="text/ruby" section="s07" name="start">
+<script type="text/ruby" section="s09" name="start">
 $PROGRAM_NAME = "start"
 # 追加のコード (your supplementary code here)
 def start(can_click=true)
+  # 遊び方やクレジットを開いているときは、これらのボタンを無効化
   buttons = [$play_button, $left_button, $right_button]
   if can_click
     for button in buttons
@@ -325,6 +745,7 @@ def start(can_click=true)
     end
   end
   
+  # 正方形の背景
   fill("white")
   noStroke
   rect($ex + 0, $ey + 0, $size * 5, $size * 5)
@@ -332,6 +753,7 @@ def start(can_click=true)
   textAlign(CENTER, CENTER)
   textSize($size)
   
+  # 「ビードロ」と描画
   vidro_text = "ビードロ"
   t_w = $size # text width
   b_w = $size * 0.15 #    blank width
@@ -348,7 +770,7 @@ def start(can_click=true)
     text(vidro_text[i], $ex + $size * 2.5 - sentence_width * 0.5 + t_w * i + b_w * i, $ey + $size)
   end
   
-  
+  # サブタイトルを描画
   textAlign(CENTER, CENTER)
   textFont("メイリオ")
   textSize($size * 0.3)
@@ -356,15 +778,21 @@ def start(can_click=true)
   fill("black")
   text("～変則的三目並べ～", $ex + $size * 2.5, $ey + $size * 2)
   
+  # 人数、推定時間、対象年齢を表示
   img_height = $size
   image($info_img, $ex + 0, $ey + $size * 5 - img_height, $info_img.width * (img_height.to_f / $info_img.height), img_height)
-  $left_button.put($ex + $size * 1.5, $ey + $size * 2.5, $size * 0.4, $size * 0.5)
-  $right_button.put($ex + $size * 3, $ey + $size * 2.5, $size * 0.4, $size * 0.5)
+  
+  # 人数変更ボタンを設置
+  $left_button.put($ex + $size * 1.2, $ey + $size * 2.5, $size * 0.4, $size * 0.5)
+  $right_button.put($ex + $size * 3.3, $ey + $size * 2.5, $size * 0.4, $size * 0.5)
+  
+  # 人数を表示
   textSize($size * $num_size)
   fill("black")
-  text($player, $ex + $size * 2.5, $ey + $size * 2.75)
+  text("#{$player}人", $ex + $size * 2.5, $ey + $size * 2.75)
   $num_size += (0.6 - $num_size) * 0.2
   
+  # その他ボタンを設置
   $play_button.put($ex + $size * 1.5, $ey + $size * 3.2, $size * 2, $size * 0.7)
   $howto_button.put($ex + $size * 3.3, $ey + $size * 4.1, $size * 1.5, $size * 0.3)
   $credit_button.put($ex + $size * 3.3, $ey + $size * 4.5, $size * 1.5, $size * 0.3)
@@ -385,12 +813,13 @@ class Button
   
   def put(x, y, width, height)
     rectMode(CORNER)
+    is_on_mouse_cursol = lambda {x < mouseX and mouseX < x + width and y < mouseY and mouseY < y + height and @can_click}
     
     case @button_type
-    when "left arrow"
+    when "left arrow" # ◀
       fill("black")
       noStroke
-      if x < mouseX and mouseX < x + width and y < mouseY and mouseY < y + height and @can_click
+      if is_on_mouse_cursol.call
         fill("gray")
         if $is_clicked
           @event.call
@@ -399,10 +828,10 @@ class Button
       end
       triangle(x + width, y, x + width, y + height, x, y + height * 0.5)
       
-    when "right arrow"
+    when "right arrow" # ▶
       fill("black")
       noStroke
-      if x < mouseX and mouseX < x + width and y < mouseY and mouseY < y + height and @can_click
+      if is_on_mouse_cursol.call
         fill("gray")
         if $is_clicked
           @event.call
@@ -411,11 +840,11 @@ class Button
       end
       triangle(x, y, x, y + height, x + width, y + height * 0.5)
       
-    when "sentence"
+    when "sentence" # 文字の書かれたボタン
       fill("white")
       strokeWeight($size * 0.01)
       stroke("black")
-      if x < mouseX and mouseX < x + width and y < mouseY and mouseY < y + height and @can_click
+      if is_on_mouse_cursol.call
         stroke("gray")
         if $is_clicked
           @event.call
@@ -427,7 +856,7 @@ class Button
       
       fill("black")
       textAlign(CENTER, CENTER)
-      if x < mouseX and mouseX < x + width and y < mouseY and mouseY < y + height and @can_click
+      if is_on_mouse_cursol.call
         fill("gray")
         if $is_clicked
           fill("black")
@@ -437,11 +866,11 @@ class Button
       textSize(height * 0.7)
       text(@sentence, x + width * 0.5, y + height * 0.5)
       
-    when "leave"
+    when "leave" # バツ印
       fill("white")
       strokeWeight($size * 0.01)
       stroke("black")
-      if x < mouseX and mouseX < x + width and y < mouseY and mouseY < y + height and @can_click
+      if is_on_mouse_cursol.call
         stroke("gray")
         if $is_clicked
           @event.call
@@ -456,28 +885,29 @@ class Button
     end
   end
   
-  def activate
+  def activate # 有効化
      @can_click = true
   end
   
-  def deactivate
+  def deactivate # 無効化 (ボタンを押してもイベントが発生しない)
     @can_click = false
   end
 end
 
 $PROGRAM_NAME = "start"
 </script>
-<script type="text/ruby" section="s08" name="telop">
+<script type="text/ruby" section="s10" name="telop">
 $PROGRAM_NAME = "telop"
 # 追加のコード (your supplementary code here)
-def telop
-  max_frame = 60
-  screen_frame = 15
+def telop # テロップを表示
+  max_frame = 60 # テロップが少しでも表示されるフレーム数
+  screen_frame = 15 # テロップが濃い状態で表示されるフレーム数
   frame_now = frameCount - $telop_frame
   if max_frame < frame_now
     return
   end
   
+  # テロップの背景を描画
   noStroke
   if frame_now <= screen_frame
     fill("rgba(255, 255, 255, #{frame_now / screen_frame})")
@@ -489,6 +919,7 @@ def telop
   rectMode(CORNER)
   rect($ex + 0, $ey + $size * 2.2, $size * 5, $size * 0.6)
   
+  # テロップのテキストを描画
   if frame_now <= screen_frame
     fill("rgba(0, 0, 0, #{frame_now / screen_frame})")
   elsif max_frame - screen_frame < frame_now
@@ -508,52 +939,85 @@ end
 
 $PROGRAM_NAME = "telop"
 </script>
-<script type="text/ruby" section="s09" name="win_judge">
+<script type="text/ruby" section="s11" name="treat url">
+$PROGRAM_NAME = "treat url"
+# 追加のコード (your supplementary code here)
+
+# 座標を動的に設定する関数
+def set_link_position(x, y, size)
+  `myLink.style.left = x + "px";
+    myLink.style.top = y + "px";
+    myLink.style.fontSize = size + "px";`
+end
+
+# 表示/非表示を切り替える関数
+def screen_link
+  `myLink.style.display = "inline";`
+end 
+
+def hide_link
+  `myLink.style.display = "none";`
+end
+
+$PROGRAM_NAME = "treat url"
+</script>
+<script type="text/ruby" section="s12" name="win_judge">
 $PROGRAM_NAME = "win_judge"
 # 追加のコード (your supplementary code here)
 def win_judge
-  look_pattern = [[[1, 0], [2, 0]], [[1, -1], [2, -2]], [[1, 1], [2, 2]], [[0, 1], [0, 2]]]
   winners = []
   
-  for i in 1..4 # プレイヤー
+  for player in 1..$player # プレイヤー全員分
     for y in 0...5
       for x in 0...5
-        if $maps[y][x] != i
-          next
-        end
-        
-        for looks in look_pattern
-          can = true
-          for look in looks
-            lx, ly = x + look[0], y + look[1]
-            
-            if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly
-              can = false
-              break
-            end
-            
-            if $maps[ly][lx] != i
-              can = false
-              break
-            end
-          end
-          
-          if can
-            winners.push(i)
-          end
-        end
+        winners = one_trout(player, x, y, winners) # $maps[y][x]の場所から3つ並ぶ場合があるか
       end
+    end
+  end
+  
+  return winners.uniq
+end
+
+def one_trout(player, x, y, winners)
+  if $maps[y][x] != player # 盤面の$maps[y][x]が違うプレイヤーのコマなら
+    return winners
+  end
+  
+  look_pattern = [[[1, 0], [2, 0]], [[1, -1], [2, -2]], [[1, 1], [2, 2]], [[0, 1], [0, 2]]]
+  for looks in look_pattern
+    can = true
+    for look in looks
+      # パターン判断基準  "その場所"
+      lx, ly = x + look[0], y + look[1]
+      
+      # 盤面外ならパターンはできない
+      if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly
+        can = false
+        break
+      end
+      
+      # 盤面の、その場所が違う色ならパターンはできない
+      if $maps[ly][lx] != player
+        can = false
+        break
+      end
+    end
+    
+    if can # 3つの条件をクリアしたなら
+      winners.push(player) # 勝利者としてカウント
     end
   end
   
   return winners
 end
+
 $PROGRAM_NAME = "win_judge"
 </script>
 <script type="text/ruby" section="s00" name="main">
 $PROGRAM_NAME = "main"
 # 初期設定用のコード (your setup code here)
 def setup
+  # 状態変数定義
   ww, wh = windowWidth - 10, windowHeight - 10
   createCanvas(ww, wh)
   $maps = [
@@ -564,6 +1028,20 @@ def setup
     [0, 0, 0, 0, 0]
   ]
   
+  # JSのクレジット用のリンク (Rubyにリンクの表示関数が無いため)
+  `window.myLink = document.createElement("a");
+    myLink.href = "https://sites.google.com/shibaurafzk.com/sikouge-mu/home";
+    myLink.innerText = "リンク";
+    myLink.target = "_blank";
+    myLink.style.position = "absolute";
+    myLink.style.left = "50px";  // 初期x座標
+    myLink.style.top = "50px";   // 初期y座標
+    myLink.style.color = "blue";
+    myLink.style.fontSize = "18px";
+    document.body.appendChild(myLink);`
+  hide_link
+  
+  # 変数定義
   $state = "start"
   $turn = 1
   $size = [ww / 5.0, wh / 5.0].min
@@ -586,118 +1064,65 @@ def setup
   $is_cursol_screen = true
   $timer = Time.now()
   $judge = []
+  $really_ask_state = "normal"
+  $stopped_timer = Time.now
+  $howto_state = 0
+  $howto_frame = 0
+  $frame_rate = 0
+  $frame_count = 0 # $frame_rate算出用
+  $when_start_frame_count = Time.now # $frame_rate算出用
   
+  # 画像読み込み
   $info_img = loadImage("info.jpeg")
   $back_ground_img = loadImage("back ground.jpeg")
+  $bodogebu_img = loadImage("ボドゲ部.jpeg")
+  
+  # ボタン定義
   $left_button = Button.new("left arrow", lambda {$player, $num_size = $player - 1, 0.4 if $player > 2})
   $right_button = Button.new("right arrow", lambda {$player, $num_size = $player + 1, 0.4 if $player < 4})
   $credit_button = Button.new("sentence", lambda {$state == "credit" ? $state = "start" : $state = "credit"}, "Credit")
-  $howto_button = Button.new("sentence", lambda {$state == "how to play" ? $state = "start" : $state = "how to play"}, "How to play")
-  $play_button = Button.new("sentence", lambda {$state, $timer = "stand by", Time.now}, "PLAY")
-  $leave_button = Button.new("leave", lambda {$leave = true})
-  $reset_button = Button.new("sentence", lambda {return_tittle}, "タイトルに戻る")
-  $toryo_button = Button.new("sentence", lambda {toryo}, "投了する")
-end
-
-def next_turn
-  $turn += 1
-  if $turn == $player + 1
-    $turn = 1
-  end
   
-  $maps_hozons.insert(0, deepcopy($maps))
-  $maps_hozons.pop
-  
-  $judge = win_judge
-  
-  if $judge != []
-    put_sentence = ""
-    if $judge.length == $player
-      put_sentence = "引き分けです"
+  def if_howto_button_is_clicked
+    $howto_frame, $howto_state = 0, 0
+    if $state == "how to play"
+      $state = "start"
     else
-      colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
-      for color in $judge
-        put_sentence = put_sentence + colors_for_human[color] + "と"
-      end
-      put_sentence = put_sentence[0...-1] + "の勝ちです"
-      
-    end
-    put_telop(put_sentence)
-    $state = "won"
-  end
-end
-
-def return_tittle
-  $maps = [
-    [0, 0, 0, 0, 0], 
-    [0, 0, 0, 0, 0], 
-    [0, 0, 0, 0, 0], 
-    [0, 0, 0, 0, 0], 
-    [0, 0, 0, 0, 0]
-  ]
-  $state = "start"
-  $turn = 1
-end
-
-def toryo
-  $turn += 1
-  if $turn == $player + 1
-    $turn = 1
-  end
-  
-  colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
-  put_telop("#{colors_for_human[$turn]}の勝ちです")
-  $judge = [$turn]
-  $state = "won"
-end
-
-def can_put_judge(sx, sy)
-  looks = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
-  for look in looks
-    lx, ly = sx + look[0], sy + look[1]
-    if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly
-      next
-    end
-    
-    if $maps[ly][lx] == $turn
-      return false
+      $state = "how to play"
     end
   end
   
-  coma_amount = 0
-  for y in 0...5
-    coma_amount += $maps[y].count($turn)
-  end
+  $howto_button = Button.new("sentence", lambda {if_howto_button_is_clicked}, "How to play")
+  $play_button = Button.new("sentence", lambda {$state, $timer, _ = "stand by", Time.now, put_telop("対戦開始")}, "Play")
+  $leave_button = Button.new("leave", lambda {$leave = true})
+  $reset_button = Button.new("sentence", lambda {$really_ask_state = "reset"}, "タイトルに戻る")
+  $toryo_button = Button.new("sentence", lambda {$really_ask_state = "toryo"}, "投了する")
+  $howto_left_button = Button.new("left arrow", lambda {$howto_state, $howto_frame = ($howto_state > 0 ? $howto_state - 1 : 0), 0})
+  $howto_right_button = Button.new("right arrow", lambda {$howto_state, $howto_frame = ($howto_state < 5 ? $howto_state + 1 : 5), 0})
   
-  if 5 <= coma_amount
-    return false
-  else
-    return true
-  end
-end
-
-def reset
-  if not mouseIsPressed
-    $can_mouse_click = true
-  end
-  
-  telop()
-  $is_clicked = false
+  $reset_yes_button = Button.new("sentence", lambda {return_tittle}, "Yes")
+  $reset_no_button = Button.new("sentence", lambda {$really_ask_state = "normal"}, "No")
+  $toryo_yes_button = Button.new("sentence", lambda {toryo}, "Yes")
+  $toryo_no_button = Button.new("sentence", lambda {$really_ask_state = "normal"}, "No")
 end
 
 # 画面描画用のコード (your draw code here)
 def draw
+  # 状態変数定義
   ww, wh = windowWidth - 10, windowHeight - 10
   $size = [ww / 5.0, wh / 5.0].min
   resizeCanvas(ww, wh)
   $ex = [(ww - wh) * 0.5, 0].max
   $ey = [(wh - ww) * 0.5, 0].max
   
+  hide_link
+  
+  # クリック判定
   if mouseIsPressed and $can_mouse_click
     $is_clicked = true
     $can_mouse_click = false
   end
   
+  # 背景
   i_w, i_h = $back_ground_img.width.to_f, $back_ground_img.height.to_f
   if i_w / ww < i_h / wh
     image($back_ground_img, 0, 0, ww, i_h * (ww / i_w))
@@ -705,6 +1130,7 @@ def draw
     image($back_ground_img, 0, 0, i_w * (wh / i_h), wh)
   end
   
+  # スタート画面なら
   case $state
   when "start"
     start
@@ -722,36 +1148,40 @@ def draw
     return
   end
   
+  # 対戦画面なら
+  # 正方形の背景
   noStroke
   fill("aliceblue")
   rectMode(CORNER)
   rect($ex, $ey, $size * 5, $size * 5)
   
+  # カーソルを滑らかに動かす
   if $is_cursol_screen
     $cx += ($cx_real - $cx) * 0.2
     $cy += ($cy_real - $cy) * 0.2
     $csize += ($csize_real - $csize) * 0.2
   end
   
+  # 状態変数を一括で変更
   $ex += $size * 0.5
   $size *= 0.8
   
+  # 盤面を描画
   colors = ["white", "rgb(255, 0, 0)", "rgb(0, 0, 255)", "rgb(0, 255, 0)", "rgb(255, 255, 0)"]
   colors_bright = ["white", "rgb(255, 150, 150)", "rgb(150, 150, 255)", "rgb(150, 255, 150)", "rgb(255, 255, 150)"]
   rectMode(CORNER)
   for y in 0...5
     for x in 0...5
+      # 1マスを描画
       fill("white")
-      
       strokeWeight($size * 0.03)
       stroke("black")
       rect($ex + x * $size, $ey + y * $size, $size, $size)
       
+      # 1マスの模様を描画
       strokeWeight($size * 0.01)
       stroke("dimgray")
-      
       baseX, baseY = $ex + (x + 0.5) * $size, $ey + (y + 0.5) * $size
-      
       for i in 0...4
         line(
           baseX + Math.sin(Math.radians(i * 45)) * ($size * 0.45), 
@@ -760,7 +1190,9 @@ def draw
           baseY + Math.cos(Math.radians(i * 45 + 180)) * ($size * 0.45))
       end
       
+      # コマを描画
       if $maps[y][x] != 0
+        noStroke
         fill(colors[$maps[y][x]])
         circle(baseX, baseY, $size * 0.8)
       end
@@ -768,17 +1200,16 @@ def draw
   end
   
   case $state
-  when "stand by"
+  when "stand by" # 待機
     standby(colors, colors_bright)
-  when "putting"
+  when "putting" # コマを選択中
     putting(colors)
-  when "moving"
+  when "moving" # コマを移動中
     moving(colors)
   end
   
-  screen_info_about_match
-  
-  reset
+  screen_info_about_match # 経過秒数などを描画
+  reset # 状態をクリーンアップ
 end
 
 $PROGRAM_NAME = "main"
