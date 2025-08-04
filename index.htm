@@ -1169,7 +1169,13 @@ def draw
   # 盤面を描画
   colors = ["white", "rgb(255, 0, 0)", "rgb(0, 0, 255)", "rgb(0, 255, 0)", "rgb(255, 255, 0)"]
   colors_bright = ["white", "rgb(255, 150, 150)", "rgb(150, 150, 255)", "rgb(150, 255, 150)", "rgb(255, 255, 150)"]
+  colors_super_bright = ["white", "rgb(105, 30, 30)", "rgb(30, 30, 105)", "rgb(30, 105, 30)", "rgb(105, 105, 30)"]
   rectMode(CORNER)
+  
+  if $state == "putting"
+    $maps[$sy][$sx] = $turn
+  end
+  
   for y in 0...5
     for x in 0...5
       # 1マスを描画
@@ -1180,7 +1186,25 @@ def draw
       
       # 1マスの模様を描画
       strokeWeight($size * 0.01)
-      stroke("dimgray")
+      case $state
+      when "stand by"
+        if can_put_judge(x, y) and $maps[y][x] == 0 or $maps[y][x] == $turn
+          stroke(colors_super_bright[$turn])
+        else
+          stroke("dimgray")
+        end
+      when "putting"
+        if can_put_judge(x, y) and ($maps[y][x] == $turn or $maps[y][x] == 0)
+          stroke(colors_super_bright[$turn])
+        else
+          stroke("dimgray")
+        end
+      when "moving"
+        stroke("dimgray")
+      when "won"
+        stroke("dimgray")
+      end
+      
       baseX, baseY = $ex + (x + 0.5) * $size, $ey + (y + 0.5) * $size
       for i in 0...4
         line(
@@ -1191,12 +1215,16 @@ def draw
       end
       
       # コマを描画
-      if $maps[y][x] != 0
+      if $maps[y][x] != 0 and not ($state == "putting" and [x, y] == [$sx, $sy])
         noStroke
         fill(colors[$maps[y][x]])
         circle(baseX, baseY, $size * 0.8)
       end
     end
+  end
+  
+  if $state == "putting"
+    $maps[$sy][$sx] = 0
   end
   
   case $state
