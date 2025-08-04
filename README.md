@@ -5,8 +5,7 @@
 
 ## [プレイ](https://hayabusa2-1998ky26.github.io/vidro-board-game/)  
 
-## [本家様](https://www.gamemarket.jp/game/181258)  
-本家ビードロはこのサイトから1500円で購入可能です。  
+## [本家様(芝浦工業大学付属中学高等学校　思考ゲーム愛好会)](https://sites.google.com/shibaurafzk.com/sikouge-mu/home)  
 
 # ルール(本家様のコピー)  
 ### ゲーム概要  
