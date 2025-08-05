@@ -160,11 +160,9 @@ def how_to_play
     howto_explain("おはじきを使った三目並べです。\n・置ける場所に制限があります。\n・おはじきを弾くことができます。\n・縦横斜いずれかの方向におはじきが\n  3つ並んだプレイヤーの勝利となります。")
     
     # 3連コマを描画
-    fill("blue")
-    noStroke
-    circle($ex + $size * 2.2, $ey + $size * 3, $size * 0.35)
-    circle($ex + $size * 2.5, $ey + $size * 3.3, $size * 0.35)
-    circle($ex + $size * 2.8, $ey + $size * 3.6, $size * 0.35)
+    screen_coma($ex + $size * 2.2, $ey + $size * 3, $size * 0.35, 2)
+    screen_coma($ex + $size * 2.5, $ey + $size * 3.3, $size * 0.35, 2)
+    screen_coma($ex + $size * 2.8, $ey + $size * 3.6, $size * 0.35, 2)
     
     # 点線を描画
     stroke("chocolate")
@@ -215,13 +213,12 @@ def how_to_play
           end
         elsif[x, y] == [1, 2]
           # もともとあるコマを描画
-          fill("blue")
-          noStroke
-          circle(baseX + one * (x + 0.5), baseY + one * (y + 0.5), one * 0.8)
+          screen_coma(baseX + one * (x + 0.5), baseY + one * (y + 0.5), one * 0.8, 2)
         else
           # 置けるコマを描画
-          fill("lightblue")
-          noStroke
+          fill("lightcyan")
+          stroke("gray")
+          strokeWeight($size * 0.01)
           circle(baseX + one * (x + 0.5), baseY + one * (y + 0.5), one * 0.8)
         end
       end
@@ -256,10 +253,8 @@ def how_to_play
     progress = [[($howto_frame - 60) / 60, 1].min, 0].max
     
     # コマを描画
-    fill("blue")
-    noStroke
-    circle(baseX + one * 2.5 - one * 2 * progress, baseY + one * 3.5 - one * 2 * progress, one * 0.8)
-    circle(baseX2 + one * 1.5 + one * 2 * progress, baseY2 + one * 0.5, one * 0.8)
+    screen_coma(baseX + one * 2.5 - one * 2 * progress, baseY + one * 3.5 - one * 2 * progress, one * 0.8, 2)
+    screen_coma(baseX2 + one * 1.5 + one * 2 * progress, baseY2 + one * 0.5, one * 0.8, 2)
     
     # 矢印を描画
     draw_yajirusi([[2.5, 3.5, 215, 1], [1.5, 0.5, 0, 2]], baseX, baseY, baseX2, baseY2, one)
@@ -295,19 +290,15 @@ def how_to_play
     progress_1_2 = [[($howto_frame - 90) / 30, 1].min, 0].max # 途中から最後まで
     
     # コマを描画
-    fill("blue")
-    noStroke
-    circle(baseX + one * 0.5, baseY + one * 0.5, one * 0.8)
-    circle(baseX + one * 0.5 + one * progress_0_1, baseY + one * 2.5, one * 0.8)
-    circle(baseX2 + one * 2.5, baseY2 + one * 0.5, one * 0.8)
-    circle(baseX2 + one * 3.5, baseY2 + one * 0.5 + one * 2 * progress_0_2, one * 0.8)
+    screen_coma(baseX + one * 0.5, baseY + one * 0.5, one * 0.8, 2)
+    screen_coma(baseX + one * 0.5 + one * progress_0_1, baseY + one * 2.5, one * 0.8, 2)
+    screen_coma(baseX2 + one * 2.5, baseY2 + one * 0.5, one * 0.8, 2)
+    screen_coma(baseX2 + one * 3.5, baseY2 + one * 0.5 + one * 2 * progress_0_2, one * 0.8, 2)
     
-    fill("green")
-    noStroke
-    circle(baseX + one * 1.5 + one * 2 * progress_0_2, baseY + one * 0.5, one * 0.8)
-    circle(baseX + one * 2.5 + one * progress_1_2, baseY + one * 2.5, one * 0.8)
-    circle(baseX2 + one * 1.5 - one * progress_0_1, baseY2 + one * 1.5 + one * progress_0_1, one * 0.8)
-    circle(baseX2 + one * 3.5, baseY2 + one * 3.5, one * 0.8)
+    screen_coma(baseX + one * 1.5 + one * 2 * progress_0_2, baseY + one * 0.5, one * 0.8, 3)
+    screen_coma(baseX + one * 2.5 + one * progress_1_2, baseY + one * 2.5, one * 0.8, 3)
+    screen_coma(baseX2 + one * 1.5 - one * progress_0_1, baseY2 + one * 1.5 + one * progress_0_1, one * 0.8, 3)
+    screen_coma(baseX2 + one * 3.5, baseY2 + one * 3.5, one * 0.8, 3)
     
     # 矢印を描画
     draw_yajirusi([[0.5, 0.5, 0, 1], [0.5, 2.5, 0, 1], [3.5, 0.5, 90, 2], [2.5, 0.5, 135, 2]], baseX, baseY, baseX2, baseY2, one)
@@ -389,9 +380,7 @@ def moving
   direction = angles[$moving_states[:angle] / 45]
   frame_now = frameCount - $moving_states[:frame] - 1
   baseX, baseY = $ex + ($sx + 0.5) * $size, $ey + ($sy + 0.5) * $size
-  fill($colors[$moving_states[:coma]])
-  noStroke
-  circle(baseX + direction[0] * $size * frame_now / need_frame, baseY + direction[1] * $size * frame_now / need_frame, $size * 0.8)
+  screen_coma(baseX + direction[0] * $size * frame_now / need_frame, baseY + direction[1] * $size * frame_now / need_frame, $size * 0.8, $moving_states[:coma])
   
   lx = $sx + direction[0]
   ly = $sy + direction[1]
@@ -482,7 +471,6 @@ def toryo
     $turn = 1
   end
   
-  $colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
   put_telop("#{$colors_for_human[$turn]}の勝ちです")
   $judge = [$turn]
   $state = "won"
@@ -545,6 +533,17 @@ def reset
   textAlign(RIGHT, BOTTOM)
   text("#{$frame_rate.to_i}fps", $ex + $size * 5, $ey + $size * 5)
   
+  $lighter_cool_time += 1
+  if frameCount > 180 and $frame_rate < 40
+    $is_heavy = true
+    $lighter_cool_time = 0
+  end
+  
+  if $lighter_cool_time > 1200 and 58 < $frame_rate
+    $is_heavy = false
+    $lighter_cool_time = 0
+  end
+  
   # デバッグ情報を表示
   debug
 end
@@ -571,6 +570,38 @@ def click_mode
 end
 
 
+def screen_coma(x, y, size, color)
+  if color.instance_of?(Integer)
+    fill_color = $colors[color]
+  else
+    fill_color = color
+  end
+  
+  fill(fill_color)
+  noStroke
+  circle(x, y, size)
+  
+  if $is_heavy
+    return
+  end
+  
+  stroke("rgba(255, 255, 255, #{0.2})")
+  strokeWeight(size * 0.05)
+  circle(x, y, size - (size * 0.05))
+  
+  noStroke
+  ww, wh = windowWidth - 10, windowHeight - 10
+  center_x, center_y = ww * 1.6, wh * -0.3
+  x_dis = (center_x - x) / ww * 0.6
+  y_dis = (center_y - y) / wh * 0.6
+  for i in 0..2
+    fill("rgba(255, 255, 255, #{0.5})")
+    progress = i / 2.0
+    circle(x + (size * 0.25) * x_dis, y + (size * 0.25) * y_dis, size * 0.2 * (2.5 - x_dis.abs - y_dis.abs) * 0.5 * progress)
+  end
+end
+
+
 def debug
   if key == "z"
     fill("black")
@@ -592,15 +623,17 @@ def putting # コマを長押し中
   $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
   
   # カーソルを描画
-  if $click_mode == "click"
-    noFill
-    stroke($colors[$turn])
-    strokeWeight($size * 0.07)
-    rectMode(CORNERS)
-    rect(
-      $ex + ($cx - $csize) * $size, $ey + ($cy - $csize) * $size, 
-      $ex + ($cx + 1 + $csize) * $size, $ey + ($cy + 1 + $csize) * $size)
+  if $click_mode == "touch"
+    $cx, $cy = $cx_real, $cy_real
   end
+  
+  noFill
+  stroke($colors[$turn])
+  strokeWeight($size * 0.07)
+  rectMode(CORNERS)
+  rect(
+    $ex + ($cx - $csize) * $size, $ey + ($cy - $csize) * $size, 
+    $ex + ($cx + 1 + $csize) * $size, $ey + ($cy + 1 + $csize) * $size)
   
   # 選択中のコマに対して、マウスカーソルがどの方向にあるか8分割
   baseX, baseY = $ex + ($sx + 0.5) * $size, $ey + ($sy + 0.5) * $size
@@ -627,9 +660,7 @@ def putting # コマを長押し中
   end
   
   # コマを描画
-  fill($colors[$turn])
-  noStroke
-  circle(baseX + Math.sin(Math.radians(angle)) * $s_distance, baseY + Math.cos(Math.radians(angle)) * $s_distance, $size * 0.8)
+  screen_coma(baseX + Math.sin(Math.radians(angle)) * $s_distance, baseY + Math.cos(Math.radians(angle)) * $s_distance, $size * 0.8, $turn)
   
   if not is_cancel_if_click
     # マウスカーソルがコマから離れた状態でクリックが離されたらコマの移動状態にする
@@ -1002,9 +1033,7 @@ def start_settings
     end
     
     if $s_colors[i] != 0
-      fill($colors_base[$s_colors[i]])
-      noStroke
-      circle(waku_x + waku_size * 0.5, waku_y + waku_size * 0.5, waku_size * 0.8)
+      screen_coma(waku_x + waku_size * 0.5, waku_y + waku_size * 0.5, waku_size * 0.8, $colors_base[$s_colors[i]])
     end
   end
   
@@ -1018,10 +1047,9 @@ def start_settings
     is_screen = ($s_colors.include?(i + 1) or $s_color == i + 1) != true
     
     if is_screen
-      fill($colors_base[i + 1])
       circle_x = $ex + ($size * 2.5 - waku_size * (4 - 1) / 2 + waku_size * i)
       circle_y = $ey + $size * 0.6 + waku_size * 1.5
-      circle(circle_x, circle_y, waku_size * 0.8)
+      screen_coma(circle_x, circle_y, waku_size * 0.8, $colors_base[i + 1])
     end
     
     if $is_clicked and is_screen
@@ -1033,8 +1061,9 @@ def start_settings
   end
   
   if $s_color != 0
-    fill($colors_base[$s_color])
-    circle(mouseX + $sx, mouseY + $sy, waku_size * 0.8)
+    screen_coma([[mouseX + $sx, $size * 5 - waku_size * 0.4 + $ex].min, waku_size * 0.4 + $ex].max, 
+      [[mouseY + $sy, $size * 2.3 - waku_size * 0.4 + $ey].min, waku_size * 0.4 + $ey].max, 
+      waku_size * 0.8, $colors_base[$s_color])
   end
   
   # 説明テキスト
@@ -1244,11 +1273,28 @@ def setup
   $s_color = 0
   $click_mode = "touch"
   $p_click_mode = ""
+  $is_heavy = false
+  $lighter_cool_time = -999999
   
   # 色
-  $colors_base = ["white", "rgb(255, 0, 0)", "rgb(0, 0, 255)", "rgb(0, 255, 0)", "rgb(255, 255, 0)"]
-  $colors_bright_base = ["white", "rgb(255, 150, 150)", "rgb(150, 150, 255)", "rgb(150, 255, 150)", "rgb(255, 255, 150)"]
-  $colors_super_bright_base = ["white", "rgb(105, 30, 30)", "rgb(30, 30, 105)", "rgb(30, 105, 30)", "rgb(105, 105, 30)"]
+  colors_base_base = [[210, 0, 0], [110, 211, 229], [110, 180, 80], [250, 210, 30]]
+  $colors_base = ["white"]
+  $colors_bright_base = ["white"]
+  $colors_super_bright_base = ["white"]
+  
+  for rgb in colors_base_base
+    $colors_base.push("rgb(#{rgb[0]}, #{rgb[1]}, #{rgb[2]})")
+    brighter_rgb = []
+    brightest_rgb = []
+    for one in rgb
+      brighter_rgb.push((one + (255 - one) * 0.5).to_i)
+      brightest_rgb.push((one + (100 - one) * 0.7).to_i)
+    end
+    
+    $colors_bright_base.push("rgb(#{brighter_rgb[0]}, #{brighter_rgb[1]}, #{brighter_rgb[2]})")
+    $colors_super_bright_base.push("rgb(#{brightest_rgb[0]}, #{brightest_rgb[1]}, #{brightest_rgb[2]})")
+  end
+  
   $colors_for_human_base = ["", "赤色", "青色", "緑色", "黄色"]
   $colors = $colors_base.clone
   $colors_bright = $colors_bright_base.clone
@@ -1377,22 +1423,9 @@ def draw
       
       # 1マスの模様を描画
       strokeWeight($size * 0.01)
-      case $state
-      when "stand by"
-        if can_put_judge(x, y) and $maps[y][x] == 0 or $maps[y][x] == $turn
-          stroke($colors_super_bright[$turn])
-        else
-          stroke("dimgray")
-        end
-      when "putting"
-        if can_put_judge(x, y) and ($maps[y][x] == $turn or $maps[y][x] == 0)
-          stroke($colors_super_bright[$turn])
-        else
-          stroke("dimgray")
-        end
-      when "moving"
-        stroke("dimgray")
-      when "won"
+      if $state != "won"
+        stroke($colors_super_bright[$turn])
+      else
         stroke("dimgray")
       end
       
@@ -1407,9 +1440,7 @@ def draw
       
       # コマを描画
       if $maps[y][x] != 0 and not ($state == "putting" and [x, y] == [$sx, $sy])
-        noStroke
-        fill($colors[$maps[y][x]])
-        circle(baseX, baseY, $size * 0.8)
+        screen_coma(baseX, baseY, $size * 0.8, $maps[y][x])
       end
     end
   end
