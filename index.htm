@@ -824,7 +824,7 @@ def start(can_click=true)
   
   # 「ビードロ」と描画
   i_w, i_h = $vidro_img.width, $vidro_img.height
-  image($vidro_img, $ex + $size * 0.05, $size * 0.3, $size * 4.9, i_h * ($size * 4.9 / i_w))
+  image($vidro_img, $ex + $size * 0.05, $ey + $size * 0.3, $size * 4.9, i_h * ($size * 4.9 / i_w))
   
   # サブタイトルを描画
   textAlign(CENTER, CENTER)
