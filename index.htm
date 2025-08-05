@@ -446,9 +446,8 @@ def next_turn
     if $judge.length == $player
       put_sentence = "引き分けです"
     else
-      colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
       for color in $judge
-        put_sentence = put_sentence + colors_for_human[color] + "と"
+        put_sentence = put_sentence + $colors_for_human[color] + "と"
       end
       put_sentence = put_sentence[0...-1] + "の勝ちです"
       
@@ -481,8 +480,8 @@ def toryo
     $turn = 1
   end
   
-  colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
-  put_telop("#{colors_for_human[$turn]}の勝ちです")
+  $colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
+  put_telop("#{$colors_for_human[$turn]}の勝ちです")
   $judge = [$turn]
   $state = "won"
   $really_ask_state = "normal"
@@ -657,13 +656,14 @@ def screen_info_about_match
     if $judge.length == $player
       put_sentence = "引き分け"
     else
-      colors_for_human = ["", "赤色", "青色", "緑色", "黄色"]
       for color in $judge
-        put_sentence = put_sentence + colors_for_human[color] + "/"
+        put_sentence = put_sentence + $colors_for_human[color] + "/"
       end
       put_sentence = put_sentence[0...-1] + "の勝ち"
     end
     text(put_sentence, $ex, $ey + $size * (5 - 0.3 - 0.1) * 1.25)
+  else
+    text("#{$colors_for_human[$turn]}の番", $ex, $ey + $size * (5 - 0.3 - 0.1) * 1.25)
   end
   
   case $really_ask_state
@@ -941,7 +941,7 @@ end
 
 $PROGRAM_NAME = "start"
 </script>
-<script type="text/ruby" section="s14" name="start settings">
+<script type="text/ruby" section="s10" name="start settings">
 $PROGRAM_NAME = "start settings"
 # 追加のコード (your supplementary code here)
 def start_settings
@@ -977,6 +977,15 @@ def start_settings
           
           $s_colors[i] = $s_color
         end
+      end
+    end
+    
+    if $is_clicked
+      if (waku_x < mouseX and mouseX < waku_x + waku_size and
+        waku_y < mouseY and mouseY < waku_y + waku_size)
+        
+        $sx, $sy, $s_color = waku_x + waku_size * 0.5 - mouseX, waku_y + waku_size * 0.5 - mouseY, $s_colors[i]
+        $s_colors[i] = 0
       end
     end
     
@@ -1031,20 +1040,21 @@ def start_settings
   end
   
   # colors再定義
-  $colors, $colors_bright, $colors_super_bright = ["white"], ["white"], ["white"]
+  $colors, $colors_bright, $colors_super_bright, $colors_for_human = ["white"], ["white"], ["white"], ["white"]
   for i in 0...$player
     $colors.push($colors_base[$s_colors[i]])
     $colors_bright.push($colors_bright_base[$s_colors[i]])
     $colors_super_bright.push($colors_super_bright_base[$s_colors[i]])
+    $colors_for_human.push($colors_for_human_base[$s_colors[i]])
   end
   
   $play_button.put($ex + $size * 1.5, $ey + $size * 3.5, $size * 2, $size * 0.7)
   $shuffle_button.put($ex + $size * 1.5, $ey + $size * 2.3, $size * 2, $size * 0.5)
-  $return_button.put($ex + $size * 2, $ey + $size * 4.3, $size * 1, $size * 0.3)
+  $return_button.put($ex + $size * 2, $ey + $size * 4.4, $size * 1, $size * 0.3)
 end
 $PROGRAM_NAME = "start settings"
 </script>
-<script type="text/ruby" section="s10" name="telop">
+<script type="text/ruby" section="s11" name="telop">
 $PROGRAM_NAME = "telop"
 # 追加のコード (your supplementary code here)
 def telop # テロップを表示
@@ -1087,7 +1097,7 @@ end
 
 $PROGRAM_NAME = "telop"
 </script>
-<script type="text/ruby" section="s11" name="treat url">
+<script type="text/ruby" section="s12" name="treat url">
 $PROGRAM_NAME = "treat url"
 # 追加のコード (your supplementary code here)
 
@@ -1109,7 +1119,7 @@ end
 
 $PROGRAM_NAME = "treat url"
 </script>
-<script type="text/ruby" section="s12" name="win_judge">
+<script type="text/ruby" section="s13" name="win_judge">
 $PROGRAM_NAME = "win_judge"
 # 追加のコード (your supplementary code here)
 def win_judge
@@ -1225,9 +1235,11 @@ def setup
   $colors_base = ["white", "rgb(255, 0, 0)", "rgb(0, 0, 255)", "rgb(0, 255, 0)", "rgb(255, 255, 0)"]
   $colors_bright_base = ["white", "rgb(255, 150, 150)", "rgb(150, 150, 255)", "rgb(150, 255, 150)", "rgb(255, 255, 150)"]
   $colors_super_bright_base = ["white", "rgb(105, 30, 30)", "rgb(30, 30, 105)", "rgb(30, 105, 30)", "rgb(105, 105, 30)"]
+  $colors_for_human_base = ["", "赤色", "青色", "緑色", "黄色"]
   $colors = $colors_base.clone
   $colors_bright = $colors_bright_base.clone
   $colors_super_bright = $colors_super_bright_base.clone
+  $colors_for_human = $colors_for_human.clone
   
   # 画像読み込み
   $info_img = loadImage("info.jpeg")
@@ -1237,7 +1249,7 @@ def setup
   # ボタン定義
   $left_button = Button.new("left arrow", lambda {$player, $num_size = $player - 1, 0.4 if $player > 2})
   $right_button = Button.new("right arrow", lambda {$player, $num_size = $player + 1, 0.4 if $player < 4})
-  $credit_button = Button.new("sentence", lambda {$state == "credit" ? $state = "start" : $state = "credit"}, "Credit")
+  $credit_button = Button.new("sentence", lambda {$state == "credit" ? $state = "start" : $state = "credit"}, "クレジット")
   
   def if_howto_button_is_clicked
     $howto_frame, $howto_state = 0, 0
