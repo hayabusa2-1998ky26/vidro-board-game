@@ -341,7 +341,7 @@ def draw_yajirusi(triangles, baseX, baseY, baseX2, baseY2, one)
   if $howto_frame <= 45
     for i in 0...triangles.length
       x, y, angle, kaso_banmen = triangles[i]
-      triangle_base = [(x + 0.25), (y - 0.25), (x + 0.25), (y + 0.25), (x + 0.75), (y)]
+      triangle_base = [(x + 0.7), (y - 0.25), (x + 0.7), (y + 0.25), (x + 1), (y)]
       triangle_one = []
       angle += 180
       
@@ -376,7 +376,7 @@ def moving
   need_frame = 20
   
   # 動いているコマを描画
-  angles = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]]
+  angles = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
   direction = angles[$moving_states[:angle] / 45]
   frame_now = frameCount - $moving_states[:frame] - 1
   baseX, baseY = $ex + ($sx + 0.5) * $size, $ey + ($sy + 0.5) * $size
@@ -602,6 +602,45 @@ def screen_coma(x, y, size, color)
 end
 
 
+def move_simulation(x, y, angle)
+  angles = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
+  direction = angles[angle / 45]
+  simu_maps = deepcopy($maps)
+  coma = simu_maps[y][x]
+  simu_maps[y][x] = 0
+  
+  i = 0
+  while true
+    lx = x + direction[0]
+    ly = y + direction[1]
+    if lx < 0 or 5 <= lx or ly < 0 or 5 <= ly # 盤面の端に到達したら
+      simu_maps[y][x] = coma
+      
+      if simu_maps == $maps_hozons[1] # 千日手
+        return false
+      elsif simu_maps == $maps # 何も動かない手
+        return false
+      else  
+        return true
+      end
+    else
+      if simu_maps[ly][lx] != 0 # 進んだ先にコマがあれば
+        simu_maps[y][x] = coma # 動かすコマを交換
+        coma = simu_maps[ly][lx]
+        simu_maps[ly][lx] = 0
+      end
+      x, y = lx, ly
+    end
+      
+    if i == 10
+      print(lx, ly)
+      break
+    end
+    i += 1
+  end
+end
+
+
 def debug
   if key == "z"
     fill("black")
@@ -618,7 +657,7 @@ $PROGRAM_NAME = "other defines"
 <script type="text/ruby" section="s06" name="putting">
 $PROGRAM_NAME = "putting"
 # 追加のコード (your supplementary code here)
-def putting # コマを長押し中
+def putting # コマを選択中
   # カーソルのサイズをゆらゆらさせる
   $csize_real = Math.sin(Math.radians(frameCount * 2)) * 0.03
   
@@ -626,7 +665,6 @@ def putting # コマを長押し中
   if $click_mode == "touch"
     $cx, $cy = $cx_real, $cy_real
   end
-  
   noFill
   stroke($colors[$turn])
   strokeWeight($size * 0.07)
@@ -634,46 +672,78 @@ def putting # コマを長押し中
   rect(
     $ex + ($cx - $csize) * $size, $ey + ($cy - $csize) * $size, 
     $ex + ($cx + 1 + $csize) * $size, $ey + ($cy + 1 + $csize) * $size)
-  
-  # 選択中のコマに対して、マウスカーソルがどの方向にあるか8分割
-  baseX, baseY = $ex + ($sx + 0.5) * $size, $ey + ($sy + 0.5) * $size
-  angle = round(Math.degrees(Math.atan((mouseX - baseX) / (mouseY - baseY))) / 45.0) * 45
-  if mouseY - baseY < 0
-    angle += 180
+
+  # 選択肢を表示
+  clicked_yajirusis = []
+  for i in 0...8
+    if $can_moves[i]
+      clicked_yajirusis.push(screen_yajirusi($sx + 0.5, $sy + 0.5, $ex, $ey, i * 45))
+    end
   end
   
-  if angle == -90
-    angle = 270
+  if not $can_moves.include?(true)
+    $state = "stand by"
+    put_telop("それは動かせません")
   end
   
-  # 40フレームごとにコマの挙動を戻す
-  if frameCount % 40 == 0
-    $s_distance = 0
+  if $is_clicked and not clicked_yajirusis.include?(true)
+    $state = "stand by"
   end
-  $s_distance += (50 - $s_distance) * 0.1
+end
+
+
+def screen_yajirusi(x, y, baseX, baseY, angle)
+  triangle_base = [(x + 0.7), (y - 0.25), (x + 0.7), (y + 0.25), (x + 1), (y)]
+  triangle_one = []
+  angle += 180
   
-  # マウスカーソルが近すぎるとキャンセル
-  is_cancel_if_click = false
-  if (mouseX - baseX).abs < $size * 0.5 and (mouseY - baseY).abs < $size * 0.5
-    $s_distance = 0
-    is_cancel_if_click = true
+  for base in 0...3
+    bx, by = triangle_base[base * 2], triangle_base[base * 2 + 1]
+    dx, dy = x - bx, y - by
+    circle_r = Math.sqrt(dx ** 2 + dy ** 2)
+    sin_a, cos_a = dy / circle_r, dx / circle_r
+    ax = circle_r * (cos_a * Math.cos(Math.radians(angle)) - sin_a * Math.sin(Math.radians(angle)))
+    ay = circle_r * (sin_a * Math.cos(Math.radians(angle)) + cos_a * Math.sin(Math.radians(angle)))
+    
+    triangle_one.push(baseX + (ax + x) * $size, baseY + (ay + y) * $size)
   end
   
-  # コマを描画
-  screen_coma(baseX + Math.sin(Math.radians(angle)) * $s_distance, baseY + Math.cos(Math.radians(angle)) * $s_distance, $size * 0.8, $turn)
-  
-  if not is_cancel_if_click
-    # マウスカーソルがコマから離れた状態でクリックが離されたらコマの移動状態にする
-    if (mouseIsPressed != true)
-      $moving_states = {coma: $turn, angle: angle, frame: frameCount}
+  is_clicked_yajirusi = false
+  if is_on_cursol(triangle_one)
+    fill($colors_bright[$turn])
+    if $is_clicked
+      $moving_states = {coma: $turn, angle: angle - 180, frame: frameCount}
       $state = "moving"
+      $maps[$sy][$sx] = 0
+      is_clicked_yajirusi = true
     end
   else
-    # マウスカーソルがコマに近すぎる状態でクリックが離されたら待機状態にする
-    if not mouseIsPressed
-      $maps[$sy][$sx] = $turn
-      $state = "stand by"
+    fill($colors[$turn])
+  end
+  
+  noStroke
+  triangle(*triangle_one)
+  return is_clicked_yajirusi
+end
+
+
+def is_on_cursol(shape_list)
+  x_list = []
+  y_list = []
+  
+  for i in 0...shape_list.length
+    if i % 2 == 0
+      x_list.push(shape_list[i])
+    else
+      y_list.push(shape_list[i])
     end
+  end
+  
+  x_max, y_max, x_min, y_min = x_list.max, y_list.max, x_list.min, y_list.min
+  if x_min < mouseX and mouseX < x_max and y_min < mouseY and mouseY < y_max
+    return true
+  else
+    return false
   end
 end
 
@@ -790,8 +860,12 @@ def standby # コマの行動待機
           put_telop("置けません")
         end
       else
-        $maps[$sy][$sx] = 0
         $state = "putting"
+        $can_moves = []
+        for i in 0...8
+          can_move = move_simulation($sx, $sy, i * 45)
+          $can_moves.push(can_move)
+        end
       end
     else
       $csize_real = -0.2
@@ -970,6 +1044,11 @@ class Button
       strokeWeight($size * 0.02)
       line(x + width * 0.3, y + height * 0.3, x + width * 0.7, y + height * 0.7)
       line(x + width * 0.3, y + height * 0.7, x + width * 0.7, y + height * 0.3)
+    
+    when "none"
+      if is_on_mouse_cursol.call and $is_clicked
+        @event.call
+      end
     end
   end
   
@@ -1409,10 +1488,6 @@ def draw
   # 盤面を描画
   rectMode(CORNER)
   
-  if $state == "putting"
-    $maps[$sy][$sx] = $turn
-  end
-  
   for y in 0...5
     for x in 0...5
       # 1マスを描画
@@ -1439,14 +1514,10 @@ def draw
       end
       
       # コマを描画
-      if $maps[y][x] != 0 and not ($state == "putting" and [x, y] == [$sx, $sy])
+      if $maps[y][x] != 0 and not ($state == "moving" and [x, y] == [$sx, $sy])
         screen_coma(baseX, baseY, $size * 0.8, $maps[y][x])
       end
     end
-  end
-  
-  if $state == "putting"
-    $maps[$sy][$sx] = 0
   end
   
   case $state
