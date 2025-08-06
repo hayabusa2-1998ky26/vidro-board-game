@@ -45,6 +45,37 @@ StoreImage.createImage('ボドゲ部.jpeg', 1280, 499, 'data:image/jpeg;base64,/
     }
   end
 </script>
+<script type="text/ruby" section="s15" name="check reach">
+$PROGRAM_NAME = "check reach"
+# 追加のコード (your supplementary code here)
+def check_reach
+  reaches = []
+  
+  for y in 0...5
+    for x in 0...5
+      
+      if $maps[y][x] != 0
+        for angle in 0...8
+          can_move, moved_maps = move_simulation(x, y, angle * 45, $maps)
+          if can_move
+            winners = win_judge(moved_maps)
+            winners.delete_if {|element| element != $maps[y][x]}
+            reaches.push(*winners)
+          else
+            winners = []
+          end
+        end
+      end
+      
+    end
+  end
+  
+  reaches = reaches.uniq
+  
+  return reaches
+end
+$PROGRAM_NAME = "check reach"
+</script>
 <script type="text/ruby" section="s01" name="credit">
 $PROGRAM_NAME = "credit"
 # 追加のコード (your supplementary code here)
@@ -430,7 +461,7 @@ def next_turn
   $maps_hozons.insert(0, deepcopy($maps))
   $maps_hozons.pop
   
-  $judge = win_judge
+  $judge = win_judge($maps)
   
   if $judge != [] # 勝者がいるなら
     put_sentence = ""
@@ -445,6 +476,19 @@ def next_turn
     end
     put_telop(put_sentence)
     $state = "won"
+    return
+  end
+  
+  reach_judge = check_reach
+  
+  if reach_judge != [] # リーチの人がいるなら
+    put_sentence = ""
+    for color in reach_judge
+      put_sentence = put_sentence + $colors_for_human[color] + "と"
+    end
+    put_sentence = put_sentence[0...-1] + "のリーチです"
+      
+    put_telop(put_sentence)
   end
 end
 
@@ -602,10 +646,10 @@ def screen_coma(x, y, size, color)
 end
 
 
-def move_simulation(x, y, angle)
+def move_simulation(x, y, angle, maps)
   angles = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]]
   direction = angles[angle / 45]
-  simu_maps = deepcopy($maps)
+  simu_maps = deepcopy(maps)
   coma = simu_maps[y][x]
   simu_maps[y][x] = 0
   
@@ -617,11 +661,11 @@ def move_simulation(x, y, angle)
       simu_maps[y][x] = coma
       
       if simu_maps == $maps_hozons[1] # 千日手
-        return false
+        return false, simu_maps
       elsif simu_maps == $maps # 何も動かない手
-        return false
+        return false, simu_maps
       else  
-        return true
+        return true, simu_maps
       end
     else
       if simu_maps[ly][lx] != 0 # 進んだ先にコマがあれば
@@ -633,7 +677,7 @@ def move_simulation(x, y, angle)
     end
       
     if i == 10
-      print(lx, ly)
+      raise "Can't find wall Error"
       break
     end
     i += 1
@@ -863,7 +907,7 @@ def standby # コマの行動待機
         $state = "putting"
         $can_moves = []
         for i in 0...8
-          can_move = move_simulation($sx, $sy, i * 45)
+          can_move, _ = move_simulation($sx, $sy, i * 45, $maps)
           $can_moves.push(can_move)
         end
       end
@@ -873,6 +917,7 @@ def standby # コマの行動待機
     end
   end
 end
+
 $PROGRAM_NAME = "standby"
 </script>
 <script type="text/ruby" section="s09" name="start">
@@ -1242,13 +1287,13 @@ $PROGRAM_NAME = "treat url"
 <script type="text/ruby" section="s13" name="win_judge">
 $PROGRAM_NAME = "win_judge"
 # 追加のコード (your supplementary code here)
-def win_judge
+def win_judge(maps)
   winners = []
   
   for player in 1..$player # プレイヤー全員分
     for y in 0...5
       for x in 0...5
-        winners = one_trout(player, x, y, winners) # $maps[y][x]の場所から3つ並ぶ場合があるか
+        winners = one_trout(player, x, y, winners, maps) # $maps[y][x]の場所から3つ並ぶ場合があるか
       end
     end
   end
@@ -1256,8 +1301,8 @@ def win_judge
   return winners.uniq
 end
 
-def one_trout(player, x, y, winners)
-  if $maps[y][x] != player # 盤面の$maps[y][x]が違うプレイヤーのコマなら
+def one_trout(player, x, y, winners, maps)
+  if maps[y][x] != player # 盤面の$maps[y][x]が違うプレイヤーのコマなら
     return winners
   end
   
@@ -1275,7 +1320,7 @@ def one_trout(player, x, y, winners)
       end
       
       # 盤面の、その場所が違う色ならパターンはできない
-      if $maps[ly][lx] != player
+      if maps[ly][lx] != player
         can = false
         break
       end
