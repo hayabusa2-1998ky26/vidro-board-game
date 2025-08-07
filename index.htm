@@ -45,7 +45,7 @@ StoreImage.createImage('ボドゲ部.jpeg', 1280, 499, 'data:image/jpeg;base64,/
     }
   end
 </script>
-<script type="text/ruby" section="s15" name="check reach">
+<script type="text/ruby" section="s01" name="check reach">
 $PROGRAM_NAME = "check reach"
 # 追加のコード (your supplementary code here)
 def check_reach
@@ -76,7 +76,7 @@ def check_reach
 end
 $PROGRAM_NAME = "check reach"
 </script>
-<script type="text/ruby" section="s01" name="credit">
+<script type="text/ruby" section="s02" name="credit">
 $PROGRAM_NAME = "credit"
 # 追加のコード (your supplementary code here)
 def credit
@@ -132,7 +132,7 @@ end
 
 $PROGRAM_NAME = "credit"
 </script>
-<script type="text/ruby" section="s02" name="deepcopy">
+<script type="text/ruby" section="s03" name="deepcopy">
 $PROGRAM_NAME = "deepcopy"
 # 追加のコード (your supplementary code here)
 def deepcopy(array) # 盤面をディープコピー
@@ -148,7 +148,7 @@ def deepcopy(array) # 盤面をディープコピー
 end
 $PROGRAM_NAME = "deepcopy"
 </script>
-<script type="text/ruby" section="s03" name="how to play">
+<script type="text/ruby" section="s04" name="how to play">
 $PROGRAM_NAME = "how to play"
 # 追加のコード (your supplementary code here)
 def how_to_play
@@ -191,9 +191,9 @@ def how_to_play
     howto_explain("おはじきを使った三目並べです。\n・置ける場所に制限があります。\n・おはじきを弾くことができます。\n・縦横斜いずれかの方向におはじきが\n  3つ並んだプレイヤーの勝利となります。")
     
     # 3連コマを描画
-    screen_coma($ex + $size * 2.2, $ey + $size * 3, $size * 0.35, 2)
-    screen_coma($ex + $size * 2.5, $ey + $size * 3.3, $size * 0.35, 2)
-    screen_coma($ex + $size * 2.8, $ey + $size * 3.6, $size * 0.35, 2)
+    screen_coma($ex + $size * 2.2, $ey + $size * 3, $size * 0.35, $colors_base[2])
+    screen_coma($ex + $size * 2.5, $ey + $size * 3.3, $size * 0.35, $colors_base[2])
+    screen_coma($ex + $size * 2.8, $ey + $size * 3.6, $size * 0.35, $colors_base[2])
     
     # 点線を描画
     stroke("chocolate")
@@ -244,7 +244,7 @@ def how_to_play
           end
         elsif[x, y] == [1, 2]
           # もともとあるコマを描画
-          screen_coma(baseX + one * (x + 0.5), baseY + one * (y + 0.5), one * 0.8, 2)
+          screen_coma(baseX + one * (x + 0.5), baseY + one * (y + 0.5), one * 0.8, $colors_base[2])
         else
           # 置けるコマを描画
           fill("lightcyan")
@@ -284,8 +284,8 @@ def how_to_play
     progress = [[($howto_frame - 60) / 60, 1].min, 0].max
     
     # コマを描画
-    screen_coma(baseX + one * 2.5 - one * 2 * progress, baseY + one * 3.5 - one * 2 * progress, one * 0.8, 2)
-    screen_coma(baseX2 + one * 1.5 + one * 2 * progress, baseY2 + one * 0.5, one * 0.8, 2)
+    screen_coma(baseX + one * 2.5 - one * 2 * progress, baseY + one * 3.5 - one * 2 * progress, one * 0.8, $colors_base[2])
+    screen_coma(baseX2 + one * 1.5 + one * 2 * progress, baseY2 + one * 0.5, one * 0.8, $colors_base[2])
     
     # 矢印を描画
     draw_yajirusi([[2.5, 3.5, 215, 1], [1.5, 0.5, 0, 2]], baseX, baseY, baseX2, baseY2, one)
@@ -321,15 +321,15 @@ def how_to_play
     progress_1_2 = [[($howto_frame - 90) / 30, 1].min, 0].max # 途中から最後まで
     
     # コマを描画
-    screen_coma(baseX + one * 0.5, baseY + one * 0.5, one * 0.8, 2)
-    screen_coma(baseX + one * 0.5 + one * progress_0_1, baseY + one * 2.5, one * 0.8, 2)
-    screen_coma(baseX2 + one * 2.5, baseY2 + one * 0.5, one * 0.8, 2)
-    screen_coma(baseX2 + one * 3.5, baseY2 + one * 0.5 + one * 2 * progress_0_2, one * 0.8, 2)
+    screen_coma(baseX + one * 0.5, baseY + one * 0.5, one * 0.8, $colors_base[2])
+    screen_coma(baseX + one * 0.5 + one * progress_0_1, baseY + one * 2.5, one * 0.8, $colors_base[2])
+    screen_coma(baseX2 + one * 2.5, baseY2 + one * 0.5, one * 0.8, $colors_base[2])
+    screen_coma(baseX2 + one * 3.5, baseY2 + one * 0.5 + one * 2 * progress_0_2, one * 0.8, $colors_base[2])
     
-    screen_coma(baseX + one * 1.5 + one * 2 * progress_0_2, baseY + one * 0.5, one * 0.8, 3)
-    screen_coma(baseX + one * 2.5 + one * progress_1_2, baseY + one * 2.5, one * 0.8, 3)
-    screen_coma(baseX2 + one * 1.5 - one * progress_0_1, baseY2 + one * 1.5 + one * progress_0_1, one * 0.8, 3)
-    screen_coma(baseX2 + one * 3.5, baseY2 + one * 3.5, one * 0.8, 3)
+    screen_coma(baseX + one * 1.5 + one * 2 * progress_0_2, baseY + one * 0.5, one * 0.8, $colors_base[3])
+    screen_coma(baseX + one * 2.5 + one * progress_1_2, baseY + one * 2.5, one * 0.8, $colors_base[3])
+    screen_coma(baseX2 + one * 1.5 - one * progress_0_1, baseY2 + one * 1.5 + one * progress_0_1, one * 0.8, $colors_base[3])
+    screen_coma(baseX2 + one * 3.5, baseY2 + one * 3.5, one * 0.8, $colors_base[3])
     
     # 矢印を描画
     draw_yajirusi([[0.5, 0.5, 0, 1], [0.5, 2.5, 0, 1], [3.5, 0.5, 90, 2], [2.5, 0.5, 135, 2]], baseX, baseY, baseX2, baseY2, one)
@@ -399,7 +399,7 @@ end
 
 $PROGRAM_NAME = "how to play"
 </script>
-<script type="text/ruby" section="s04" name="moving">
+<script type="text/ruby" section="s05" name="moving">
 $PROGRAM_NAME = "moving"
 # 追加のコード (your supplementary code here)
 def moving
@@ -446,7 +446,7 @@ def moving
 end
 $PROGRAM_NAME = "moving"
 </script>
-<script type="text/ruby" section="s05" name="other defines">
+<script type="text/ruby" section="s06" name="other defines">
 $PROGRAM_NAME = "other defines"
 # 追加のコード (your supplementary code here)
 
@@ -458,8 +458,11 @@ def next_turn
   end
   
   # 千日手防止の盤面保存
-  $maps_hozons.insert(0, deepcopy($maps))
+  $maps_hozons.unshift(deepcopy($maps))
   $maps_hozons.pop
+  
+  # 待った可能に
+  $can_previous = true
   
   $judge = win_judge($maps)
   
@@ -490,6 +493,19 @@ def next_turn
       
     put_telop(put_sentence)
   end
+end
+
+
+def previous_turn
+  $turn -= 1
+  if $turn == 0
+    $turn = $player
+  end
+  
+  $maps_hozons.push(0)
+  $maps_hozons = $maps_hozons.drop(1)
+  $maps = deepcopy($maps_hozons[0])
+  $can_previous = false
 end
 
 
@@ -689,16 +705,25 @@ def debug
   if key == "z"
     fill("black")
     noStroke
-    textSize($size * 0.3)
+    textSize($size * 0.2)
     textAlign(LEFT, TOP)
-    text("mouseX: #{(mouseX - $ex) / $size.to_f}\nmouseY: #{(mouseY - $ey) / $size.to_f}\n", 0, 0)
+    # text("mouseX: #{(mouseX - $ex) / $size.to_f}\nmouseY: #{(mouseY - $ey) / $size.to_f}\n", 0, 0)
+    screen_text = ""
+    for i in 0...3
+      for y in 0...5
+        screen_text += $maps_hozons[i][y].to_s + "\n"
+      end
+      screen_text += "\n"
+    end
+    
+    text(screen_text, 0, 0)
   end
 end
 
 
 $PROGRAM_NAME = "other defines"
 </script>
-<script type="text/ruby" section="s06" name="putting">
+<script type="text/ruby" section="s07" name="putting">
 $PROGRAM_NAME = "putting"
 # 追加のコード (your supplementary code here)
 def putting # コマを選択中
@@ -730,8 +755,20 @@ def putting # コマを選択中
     put_telop("それは動かせません")
   end
   
-  if $is_clicked and not clicked_yajirusis.include?(true)
-    $state = "stand by"
+  if $is_clicked
+    cx, cy = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
+    if (mouseX < $ex or 4 < cx or mouseY < $ey or 4 < cy or 
+      $maps[cy][cx] != $turn or (cx == $sx and cy == $sy))
+      $state = "stand by"
+    else
+      $sx, $sy = cx, cy
+      $cx_real, $cy_real = cx, cy
+      $can_moves = []
+      for i in 0...8
+        can_move, _ = move_simulation($sx, $sy, i * 45, $maps)
+        $can_moves.push(can_move)
+      end
+    end
   end
 end
 
@@ -754,15 +791,16 @@ def screen_yajirusi(x, y, baseX, baseY, angle)
   
   is_clicked_yajirusi = false
   if is_on_cursol(triangle_one)
-    fill($colors_bright[$turn])
+    fill($colors_super_bright[$turn])
     if $is_clicked
       $moving_states = {coma: $turn, angle: angle - 180, frame: frameCount}
       $state = "moving"
       $maps[$sy][$sx] = 0
       is_clicked_yajirusi = true
+      $is_clicked = false
     end
   else
-    fill($colors[$turn])
+    fill($colors_bright[$turn])
   end
   
   noStroke
@@ -793,7 +831,7 @@ end
 
 $PROGRAM_NAME = "putting"
 </script>
-<script type="text/ruby" section="s07" name="screen info about match">
+<script type="text/ruby" section="s08" name="screen info about match">
 $PROGRAM_NAME = "screen info about match"
 # 追加のコード (your supplementary code here)
 def screen_info_about_match
@@ -810,7 +848,9 @@ def screen_info_about_match
   text("#{(($stopped_timer - $timer) / 60).to_i}分 #{($stopped_timer - $timer).to_i % 60}秒経過", $ex, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
   
   # 行動中ならボタンを無効化
-  buttons = [$reset_button, $toryo_button, $reset_yes_button, $reset_no_button, $toryo_yes_button, $toryo_no_button]
+  buttons = [$reset_button, $toryo_button, $previous_button, $reset_yes_button, 
+  $reset_no_button, $toryo_yes_button, $toryo_no_button, $previous_yes_button, $previous_no_button]
+  
   if $state == "moving" or $state == "putting"
     for button in buttons
       button.deactivate
@@ -837,28 +877,53 @@ def screen_info_about_match
     text("#{$colors_for_human[$turn]}の番", $ex, $ey + $size * (5 - 0.3 - 0.1) * 1.25)
   end
   
-  case $really_ask_state
-  when "normal" # 元の状態
-    $reset_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 2, $size * 0.3 * 1.25)
-    if $player == 2 and $state != "won"
-      $toryo_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
+  # ボタン
+  if $can_previous
+    $previous_button.activate
+  else
+    $previous_button.deactivate
+  end
+  
+  if $really_ask_state == "normal"
+    if $state != "won"
+      $previous_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 2, $size * 0.3 * 1.25)
+      if $player == 2 and $state != "won"
+        $toryo_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
+      end
+    else
+      $reset_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 2, $size * 0.3 * 1.25)
+      if $player == 2 and $state != "won"
+        $toryo_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
+      end
     end
-  when "reset" # "タイトルに戻る"が押されたとき
+  else
+    put_text, put_yes_button, put_no_button = "", nil, nil
+    case $really_ask_state
+    when "reset" # "タイトルに戻る"が押されたとき
+      textAlign(RIGHT, TOP)
+      put_text = "本当に戻りますか？"
+      put_yes_button = $reset_yes_button
+      put_no_button = $reset_no_button
+    when "toryo" # "投了する"が押されたとき
+      put_text = "本当に投了しますか？"
+      put_yes_button = $toryo_yes_button
+      put_no_button = $toryo_no_button
+    when "previous" # "待った"が押されたとき
+      put_text = "本当に一手戻しますか？"
+      put_yes_button = $previous_yes_button
+      put_no_button = $previous_no_button
+    end
+    
     textAlign(RIGHT, TOP)
-    text("本当に戻りますか？", $ex + $size * 5, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
-    $reset_yes_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
-    $reset_no_button.put($ex + $size * (5 - 0.9), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
-  when "toryo" # "投了する"が押されたとき
-    textAlign(RIGHT, TOP)
-    text("本当に投了しますか？", $ex + $size * 5, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
-    $toryo_yes_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
-    $toryo_no_button.put($ex + $size * (5 - 0.9), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
+    text(put_text, $ex + $size * 5, $ey + $size * (5 - 0.3 - 0.5) * 1.25)
+    put_yes_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
+    put_no_button.put($ex + $size * (5 - 0.9), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 0.9, $size * 0.3 * 1.25)
   end
 end
 
 $PROGRAM_NAME = "screen info about match"
 </script>
-<script type="text/ruby" section="s08" name="standby">
+<script type="text/ruby" section="s09" name="standby">
 $PROGRAM_NAME = "standby"
 # 追加のコード (your supplementary code here)
 def standby # コマの行動待機
@@ -893,23 +958,21 @@ def standby # コマの行動待機
     $sx, $sy = $cx_real, $cy_real
     can_put = can_put_judge($sx, $sy)
     
-    if $maps[$sy][$sx] == $turn or $maps[$sy][$sx] == 0
-      if $maps[$sy][$sx] == 0
-        if can_put
-          $maps[$sy][$sx] = $turn
-          $csize_real = -0.6
-          next_turn
-        else
-          $csize_real = -0.2
-          put_telop("置けません")
-        end
+    if $maps[$sy][$sx] == 0
+      if can_put
+        $maps[$sy][$sx] = $turn
+        $csize_real = -0.6
+        next_turn
       else
-        $state = "putting"
-        $can_moves = []
-        for i in 0...8
-          can_move, _ = move_simulation($sx, $sy, i * 45, $maps)
-          $can_moves.push(can_move)
-        end
+        $csize_real = -0.2
+        put_telop("置けません")
+      end
+    elsif $maps[$sy][$sx] == $turn
+      $state = "putting"
+      $can_moves = []
+      for i in 0...8
+        can_move, _ = move_simulation($sx, $sy, i * 45, $maps)
+        $can_moves.push(can_move)
       end
     else
       $csize_real = -0.2
@@ -920,12 +983,12 @@ end
 
 $PROGRAM_NAME = "standby"
 </script>
-<script type="text/ruby" section="s09" name="start">
+<script type="text/ruby" section="s10" name="start">
 $PROGRAM_NAME = "start"
 # 追加のコード (your supplementary code here)
 def start(can_click=true)
   # 遊び方やクレジットを開いているときは、これらのボタンを無効化
-  buttons = [$play_button, $left_button, $right_button]
+  buttons = [$start_button, $left_button, $right_button]
   if can_click
     for button in buttons
       button.activate
@@ -1108,7 +1171,7 @@ end
 
 $PROGRAM_NAME = "start"
 </script>
-<script type="text/ruby" section="s10" name="start settings">
+<script type="text/ruby" section="s11" name="start settings">
 $PROGRAM_NAME = "start settings"
 # 追加のコード (your supplementary code here)
 def start_settings
@@ -1219,7 +1282,7 @@ def start_settings
 end
 $PROGRAM_NAME = "start settings"
 </script>
-<script type="text/ruby" section="s11" name="telop">
+<script type="text/ruby" section="s12" name="telop">
 $PROGRAM_NAME = "telop"
 # 追加のコード (your supplementary code here)
 def telop # テロップを表示
@@ -1262,7 +1325,7 @@ end
 
 $PROGRAM_NAME = "telop"
 </script>
-<script type="text/ruby" section="s12" name="treat url">
+<script type="text/ruby" section="s13" name="treat url">
 $PROGRAM_NAME = "treat url"
 # 追加のコード (your supplementary code here)
 
@@ -1284,7 +1347,7 @@ end
 
 $PROGRAM_NAME = "treat url"
 </script>
-<script type="text/ruby" section="s13" name="win_judge">
+<script type="text/ruby" section="s14" name="win_judge">
 $PROGRAM_NAME = "win_judge"
 # 追加のコード (your supplementary code here)
 def win_judge(maps)
@@ -1376,7 +1439,7 @@ def setup
   $selected = 0
   $can_mouse_click = true
   $moving_states = []
-  $maps_hozons = [0, 0]
+  $maps_hozons = [deepcopy($maps), deepcopy($maps), deepcopy($maps)]
   $telop_text = ""
   $telop_frame = -9999999
   $player = 2
@@ -1399,6 +1462,7 @@ def setup
   $p_click_mode = ""
   $is_heavy = false
   $lighter_cool_time = -999999
+  $can_previous = true
   
   # 色
   colors_base_base = [[210, 0, 0], [110, 211, 229], [110, 180, 80], [250, 210, 30]]
@@ -1412,7 +1476,7 @@ def setup
     brightest_rgb = []
     for one in rgb
       brighter_rgb.push((one + (255 - one) * 0.5).to_i)
-      brightest_rgb.push((one + (100 - one) * 0.7).to_i)
+      brightest_rgb.push((one + (255 - one) * 0.7).to_i)
     end
     
     $colors_bright_base.push("rgb(#{brighter_rgb[0]}, #{brighter_rgb[1]}, #{brighter_rgb[2]})")
@@ -1447,15 +1511,18 @@ def setup
   
   $howto_button = Button.new("sentence", lambda {if_howto_button_is_clicked}, "遊び方")
   $start_button = Button.new("sentence", lambda {$state, $s_colors = "start settings", [0] * $player}, "スタート")
-  $play_button = Button.new("sentence", lambda {$state, $timer, _ = "stand by", Time.now, put_telop("対戦開始")}, "プレイ")
+  $play_button = Button.new("sentence", lambda {$state, $timer, _, $maps_hozons = "stand by", Time.now, put_telop("対戦開始"), [deepcopy($maps), deepcopy($maps), deepcopy($maps)]}, "プレイ")
   $leave_button = Button.new("leave", lambda {$leave = true})
   $reset_button = Button.new("sentence", lambda {$really_ask_state = "reset"}, "タイトルに戻る")
   $toryo_button = Button.new("sentence", lambda {$really_ask_state = "toryo"}, "投了する")
+  $previous_button = Button.new("sentence", lambda {$really_ask_state = "previous"}, "一手戻す")
   $howto_left_button = Button.new("left arrow", lambda {$howto_state, $howto_frame = ($howto_state > 0 ? $howto_state - 1 : 0), 0})
   $howto_right_button = Button.new("right arrow", lambda {$howto_state, $howto_frame = ($howto_state < 5 ? $howto_state + 1 : 5), 0})
   $shuffle_button = Button.new("sentence", lambda {$s_colors = $s_colors.shuffle}, "シャッフル")
   $return_button = Button.new("sentence", lambda {$state = "start"}, "戻る")
   
+  $previous_yes_button = Button.new("sentence", lambda {$really_ask_state, _ = "normal", previous_turn}, "はい")
+  $previous_no_button = Button.new("sentence", lambda {$really_ask_state = "normal"}, "いいえ")
   $reset_yes_button = Button.new("sentence", lambda {return_tittle}, "はい")
   $reset_no_button = Button.new("sentence", lambda {$really_ask_state = "normal"}, "いいえ")
   $toryo_yes_button = Button.new("sentence", lambda {toryo}, "はい")
@@ -1543,11 +1610,7 @@ def draw
       
       # 1マスの模様を描画
       strokeWeight($size * 0.01)
-      if $state != "won"
-        stroke($colors_super_bright[$turn])
-      else
-        stroke("dimgray")
-      end
+      stroke("dimgray")
       
       baseX, baseY = $ex + (x + 0.5) * $size, $ey + (y + 0.5) * $size
       for i in 0...4
