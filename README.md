@@ -4,7 +4,9 @@
 これはそのビードロをRubyで再現したものになります。   
 
 ## [プレイ](https://hayabusa2-1998ky26.github.io/vidro-board-game/)  
-
+![img](/img1.png)
+![img](/img2.png)
+![img](/img3.png)
 ## [本家様(芝浦工業大学付属中学高等学校　思考ゲーム愛好会)](https://sites.google.com/shibaurafzk.com/sikouge-mu/home)  
 
 # ルール(本家様のコピー)  
