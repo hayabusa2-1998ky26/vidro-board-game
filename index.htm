@@ -248,8 +248,7 @@ def how_to_play
         else
           # 置けるコマを描画
           fill("lightcyan")
-          stroke("gray")
-          strokeWeight($size * 0.01)
+          noStroke
           circle(baseX + one * (x + 0.5), baseY + one * (y + 0.5), one * 0.8)
         end
       end
@@ -769,6 +768,8 @@ def putting # コマを選択中
         $can_moves.push(can_move)
       end
     end
+    
+    $is_clicked = false
   end
 end
 
@@ -878,7 +879,7 @@ def screen_info_about_match
   end
   
   # ボタン
-  if $can_previous and $maps == $maps_hozons[0]
+  if $can_previous and $maps == $maps_hozons[0] and $state == "stand by"
     $previous_button.activate
   else
     $previous_button.deactivate
