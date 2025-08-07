@@ -878,7 +878,7 @@ def screen_info_about_match
   end
   
   # ボタン
-  if $can_previous
+  if $can_previous and $maps == $maps_hozons[0]
     $previous_button.activate
   else
     $previous_button.deactivate
@@ -889,12 +889,11 @@ def screen_info_about_match
       $previous_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 2, $size * 0.3 * 1.25)
       if $player == 2 and $state != "won"
         $toryo_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
+      else
+        $reset_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
       end
     else
-      $reset_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.1) * 1.25, $size * 2, $size * 0.3 * 1.25)
-      if $player == 2 and $state != "won"
-        $toryo_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
-      end
+      $reset_button.put($ex + $size * (5 - 2), $ey + $size * (5 - 0.3 - 0.5) * 1.25, $size * 2, $size * 0.3 * 1.25)
     end
   else
     put_text, put_yes_button, put_no_button = "", nil, nil
@@ -1203,7 +1202,7 @@ def start_settings
     if $s_color != 0
       if not mouseIsPressed
         if (waku_x < mouseX + $sx and mouseX + $sx < waku_x + waku_size and
-          waku_y < mouseY and mouseY + $sy < waku_y + $sy + waku_size)
+          waku_y < mouseY + $sy and mouseY + $sy < waku_y + waku_size)
           
           $s_colors[i] = $s_color
         end
