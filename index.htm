@@ -1464,6 +1464,16 @@ def setup
   $lighter_cool_time = -999999
   $can_previous = true
   
+  # AIのデータを読み込み
+  q_table = []
+  
+  puts "Opening"
+  File.open("/q_table.txt", "r") do |f|
+    puts "Reading"
+    q_table = eval(f.read)
+    puts "Success!"
+  end
+  
   # 色
   colors_base_base = [[210, 0, 0], [110, 211, 229], [110, 180, 80], [250, 210, 30]]
   $colors_base = ["white"]
