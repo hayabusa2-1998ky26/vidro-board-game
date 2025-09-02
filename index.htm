@@ -517,6 +517,7 @@ def return_tittle
     [0, 0, 0, 0, 0], 
     [0, 0, 0, 0, 0]
   ]
+  $maps_hozons = [deepcopy($maps), deepcopy($maps), deepcopy($maps)]
   $state = "start"
   $turn = 1
   $really_ask_state = "normal"
@@ -1463,16 +1464,6 @@ def setup
   $is_heavy = false
   $lighter_cool_time = -999999
   $can_previous = true
-  
-  # AIのデータを読み込み
-  q_table = []
-  
-  puts "Opening"
-  File.open("/q_table.txt", "r") do |f|
-    puts "Reading"
-    q_table = eval(f.read)
-    puts "Success!"
-  end
   
   # 色
   colors_base_base = [[210, 0, 0], [110, 211, 229], [110, 180, 80], [250, 210, 30]]
