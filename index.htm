@@ -45,6 +45,50 @@ StoreImage.createImage('ボドゲ部.jpeg', 1280, 499, 'data:image/jpeg;base64,/
     }
   end
 </script>
+<script type="text/ruby" section="s16" name="ai">
+$PROGRAM_NAME = "ai"
+# 追加のコード (your supplementary code here)
+def decide_pattern
+  state = 0
+  for y in 0...5
+    for x in 0...5
+      state += $maps[y][x] * (3 ** (x + y * 5))
+    end
+  end
+    
+  action_list = $ai_data[state]
+  action = nil
+  if action_list == nil
+    action = rand(0...25 + 8 * 5).to_i
+  else
+    action = action_list[0][action_list[1].index(action_list[1].max)]
+  end
+  return action
+end
+
+def put_memory(maps, action)
+  state = 0
+  for y in 0...5
+    for x in 0...5
+      state += maps[y][x] * (3 ** (x + y * 5))
+    end
+  end
+  
+  action_list = $ai_data[state]
+  if action_list == nil
+    $ai_data[state] = [[action], [1]]
+  else
+    if action_list[0].include?(action)
+      action_list[1][action_list[0].index(action)] = 1 + action_list[1][action_list[0].index(action)]
+    else
+      action_list[0].push(action)
+      action_list[1].push(1)
+    end
+  end
+end
+
+$PROGRAM_NAME = "ai"
+</script>
 <script type="text/ruby" section="s01" name="check reach">
 $PROGRAM_NAME = "check reach"
 # 追加のコード (your supplementary code here)
@@ -741,7 +785,15 @@ def putting # コマを選択中
   rect(
     $ex + ($cx - $csize) * $size, $ey + ($cy - $csize) * $size, 
     $ex + ($cx + 1 + $csize) * $size, $ey + ($cy + 1 + $csize) * $size)
-
+  
+  if $is_ai_mode and $turn == $ais_turn
+    $moving_states = {coma: $turn, angle: $ai_action_bringer * 45 - 180, frame: frameCount}
+    $state = "moving"
+    $maps[$sy][$sx] = 0
+    is_clicked_yajirusi = true
+    $is_clicked = false
+  end
+  
   # 選択肢を表示
   clicked_yajirusis = []
   for i in 0...8
@@ -795,6 +847,30 @@ def screen_yajirusi(x, y, baseX, baseY, angle)
   if is_on_cursol(triangle_one)
     fill($colors_super_bright[$turn])
     if $is_clicked
+      if $turn == 1 and $is_ai_mode
+        is_finish = false
+        comas_count = 0
+        $maps.each_with_index do |y_list, y|
+          for x in 0...5
+            coma = y_list[x]
+            if coma == $turn
+              if [$sx, $sy] == [x, y]
+                is_finish = true
+                break
+              end
+              
+              comas_count += 1
+            end
+          end
+          
+          if is_finish
+            break
+          end
+        end
+        
+        put_memory($maps, 25 + comas_count * 8 + angle / 45)
+      end
+      
       $moving_states = {coma: $turn, angle: angle - 180, frame: frameCount}
       $state = "moving"
       $maps[$sy][$sx] = 0
@@ -943,6 +1019,46 @@ def standby # コマの行動待機
     $cx_real, $cy_real = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
   end
   
+  if $is_ai_mode and $turn == $ais_turn # AIの行動
+    action = decide_pattern
+    if action < 25
+      $cx_real, $cy_real = (action % 5).to_i, (action / 5).to_i
+      if can_put_judge($cx_real, $cy_real)
+        $is_clicked = true
+        $is_cursol_reaction = true
+      else
+        $is_clicked = false
+      end
+    else
+      ai_comas = []
+      for y in 0...5
+        for x in 0...5
+          if $maps[y][x] == $turn
+            ai_comas.push([x.to_i, y.to_i])
+          end
+        end
+      end
+      
+      coma_place, coma_angle = ((action - 25) / 8).to_i, (action - 25) % 8
+      if ai_comas[coma_place] != nil
+        if keyIsDown(88)
+          textSize(30)
+          fill("black")
+          noStroke
+          textAlign(LEFT, TOP)
+          text("#{coma_place}, #{coma_angle}, #{ai_comas}", 30, 30)
+        end
+        can_move, _ = move_simulation($cx_real, $cy_real, coma_angle * 45, $maps)
+        if can_move
+          $cx_real, $cy_real = ai_comas[coma_place]
+          $is_clicked = true
+          $is_cursol_reaction = true
+          $ai_action_bringer = coma_angle
+        end
+      end
+    end
+  end
+
   # カーソルを表示
   if $click_mode == "click"
     noFill
@@ -961,6 +1077,10 @@ def standby # コマの行動待機
     
     if $maps[$sy][$sx] == 0
       if can_put
+        if $turn == 1 and $is_ai_mode
+          put_memory($maps, $sx + $sy * 5)
+        end
+        
         $maps[$sy][$sx] = $turn
         $csize_real = -0.6
         next_turn
@@ -1022,15 +1142,15 @@ def start(can_click=true)
   image($info_img, $ex + 0, $ey + $size * 5 - img_height, $info_img.width * (img_height.to_f / $info_img.height), img_height)
   
   # 人数変更ボタンを設置
-  if $player == 2
+  if $player == 1
     $left_button.deactivate
-    $right_button.activate
-  elsif $player == 3
-    $left_button.activate
     $right_button.activate
   elsif $player == 4
     $left_button.activate
     $right_button.deactivate
+  else
+    $left_button.activate
+    $right_button.activate
   end
   $left_button.put($ex + $size * 1.2, $ey + $size * 2.5, $size * 0.4, $size * 0.5)
   $right_button.put($ex + $size * 3.3, $ey + $size * 2.5, $size * 0.4, $size * 0.5)
@@ -1045,6 +1165,7 @@ def start(can_click=true)
   $start_button.put($ex + $size * 1, $ey + $size * 3.2, $size * 3, $size * 0.7)
   $howto_button.put($ex + $size * 3.3, $ey + $size * 4.1, $size * 1.5, $size * 0.3)
   $credit_button.put($ex + $size * 3.3, $ey + $size * 4.5, $size * 1.5, $size * 0.3)
+  $save_ai_button.put($ex + $size * 4, $ey + $size * 3, $size * 0.8, $size * 0.2)
   
   if can_click
     $is_clicked = false
@@ -1176,6 +1297,12 @@ $PROGRAM_NAME = "start"
 $PROGRAM_NAME = "start settings"
 # 追加のコード (your supplementary code here)
 def start_settings
+  if $player == 1
+    $is_ai_mode = true
+    $player = 2
+    $s_colors = [0, 0]
+  end
+  
   # 正方形の背景
   fill("white")
   noStroke
@@ -1199,7 +1326,11 @@ def start_settings
     noStroke
     textSize(waku_size * 0.25)
     textAlign(LEFT, BOTTOM)
-    text("#{i + 1}番目", waku_x, waku_y)
+    if $is_ai_mode and ((i == 1 and $turn_exchange == false) or (i == 0 and $turn_exchange == true))
+      text("#{i + 1}番目 AI", waku_x, waku_y)
+    else
+      text("#{i + 1}番目", waku_x, waku_y)
+    end
     
     if $s_color != 0
       if not mouseIsPressed
@@ -1280,6 +1411,9 @@ def start_settings
   $play_button.put($ex + $size * 1.5, $ey + $size * 3.5, $size * 2, $size * 0.7)
   $shuffle_button.put($ex + $size * 1.5, $ey + $size * 2.3, $size * 2, $size * 0.5)
   $return_button.put($ex + $size * 2, $ey + $size * 4.4, $size * 1, $size * 0.3)
+  
+  $turn_exchange
+  $sente_gote_button.put($ex + $size * 3.4, $ey + $size * 4.3, $size * 1.6, $size * 0.3)
 end
 $PROGRAM_NAME = "start settings"
 </script>
@@ -1464,6 +1598,11 @@ def setup
   $is_heavy = false
   $lighter_cool_time = -999999
   $can_previous = true
+  $ai_data = Hash.new()
+  $is_ai_mode = false
+  $ai_action_bringer = nil
+  $turn_exchange = false
+  $ais_turn = 2
   
   # 色
   colors_base_base = [[210, 0, 0], [110, 211, 229], [110, 180, 80], [250, 210, 30]]
@@ -1497,7 +1636,7 @@ def setup
   $vidro_img = loadImage("bi-doro.png")
   
   # ボタン定義
-  $left_button = Button.new("left arrow", lambda {$player, $num_size = $player - 1, 0.4 if $player > 2})
+  $left_button = Button.new("left arrow", lambda {$player, $num_size = $player - 1, 0.4 if $player > 1})
   $right_button = Button.new("right arrow", lambda {$player, $num_size = $player + 1, 0.4 if $player < 4})
   $credit_button = Button.new("sentence", lambda {$state == "credit" ? $state = "start" : $state = "credit"}, "クレジット")
   
@@ -1512,7 +1651,7 @@ def setup
   
   $howto_button = Button.new("sentence", lambda {if_howto_button_is_clicked}, "遊び方")
   $start_button = Button.new("sentence", lambda {$state, $s_colors = "start settings", [0] * $player}, "スタート")
-  $play_button = Button.new("sentence", lambda {$state, $timer, _, $maps_hozons = "stand by", Time.now, put_telop("対戦開始"), [deepcopy($maps), deepcopy($maps), deepcopy($maps)]}, "プレイ")
+  $play_button = Button.new("sentence", lambda {play_button_func}, "プレイ")
   $leave_button = Button.new("leave", lambda {$leave = true})
   $reset_button = Button.new("sentence", lambda {$really_ask_state = "reset"}, "タイトルに戻る")
   $toryo_button = Button.new("sentence", lambda {$really_ask_state = "toryo"}, "投了する")
@@ -1521,13 +1660,29 @@ def setup
   $howto_right_button = Button.new("right arrow", lambda {$howto_state, $howto_frame = ($howto_state < 5 ? $howto_state + 1 : 5), 0})
   $shuffle_button = Button.new("sentence", lambda {$s_colors = $s_colors.shuffle}, "シャッフル")
   $return_button = Button.new("sentence", lambda {$state = "start"}, "戻る")
+  $sente_gote_button = Button.new("sentence", lambda {$turn_exchange, $s_colors = $turn_exchange == false, $s_colors.reverse}, "先手後手交換")
+  $save_ai_button = Button.new("sentence", lambda {`saveStrings([#{$ai_data.to_s}], 'AI_data.txt');`}, "AIデータを保存する")
   
   $previous_yes_button = Button.new("sentence", lambda {$really_ask_state, _ = "normal", previous_turn}, "はい")
   $previous_no_button = Button.new("sentence", lambda {$really_ask_state = "normal"}, "いいえ")
   $reset_yes_button = Button.new("sentence", lambda {return_tittle}, "はい")
   $reset_no_button = Button.new("sentence", lambda {$really_ask_state = "normal"}, "いいえ")
   $toryo_yes_button = Button.new("sentence", lambda {toryo}, "はい")
-  $toryo_no_button = Button.new("sentence", lambda {$really_ask_state = "normal"}, "いいえ")
+  $toryo_no_button = Button.new("sentence", lambda {$really_ask_state= "normal"}, "いいえ")
+end
+
+def play_button_func
+  if $is_ai_mode and $turn_exchange
+    $ais_turn = 1
+  else
+    $turn = 1
+    $ais_turn = 2
+  end
+  
+  $state = "stand by"
+  $timer = Time.now
+  put_telop("対戦開始")
+  $maps_hozons = [deepcopy($maps), deepcopy($maps), deepcopy($maps)]
 end
 
 # 画面描画用のコード (your draw code here)
