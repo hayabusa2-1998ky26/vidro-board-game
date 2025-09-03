@@ -681,6 +681,7 @@ def return_tittle
   $state = "start"
   $turn = 1
   $really_ask_state = "normal"
+  $is_ai_mode = false
 end
 
 
@@ -1584,8 +1585,9 @@ def start_settings
   $shuffle_button.put($ex + $size * 1.5, $ey + $size * 2.3, $size * 2, $size * 0.5)
   $return_button.put($ex + $size * 2, $ey + $size * 4.4, $size * 1, $size * 0.3)
   
-  $turn_exchange
-  $sente_gote_button.put($ex + $size * 3.4, $ey + $size * 4.3, $size * 1.6, $size * 0.3)
+  if $is_ai_mode
+    $sente_gote_button.put($ex + $size * 3.4, $ey + $size * 4.3, $size * 1.6, $size * 0.3)
+  end
 end
 $PROGRAM_NAME = "start settings"
 </script>
