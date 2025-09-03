@@ -49,12 +49,18 @@ StoreImage.createImage('ボドゲ部.jpeg', 1280, 499, 'data:image/jpeg;base64,/
 $PROGRAM_NAME = "ai"
 # 追加のコード (your supplementary code here)
 def decide_pattern
-  state = 0
-  for y in 0...5
-    for x in 0...5
-      state += $maps[y][x] * (3 ** (x + y * 5))
+  states = []
+  look_maps = deepcopy($maps)
+  for rotate in 0...4
+    for mirror in 0...2
+      state = maps_to_int(look_maps)
+      states.push(state)
+      look_maps = mirror_maps(look_maps)
     end
+    look_maps = rotate_maps(look_maps)
   end
+  state = states.min
+  rotate_amount, mirror_amount = (states.index(state) / 2).to_i, states.index(state) % 2
     
   action_list = $ai_data[state]
   action = nil
@@ -63,15 +69,114 @@ def decide_pattern
   else
     action = action_list[0][action_list[1].index(action_list[1].max)]
   end
-  return action
+  
+  if action < 25
+    act_x, act_y = action % 5, (action / 5).to_i
+    act_x, act_y = rotate_place(*mirror_place(act_x, act_y, mirror_amount), rotate_amount)
+    action = act_x + act_y * 5
+  else
+    ai_comas = []
+    for y in 0...5
+      for x in 0...5
+        if $maps[y][x] == $turn
+          ai_comas.push([x.to_i, y.to_i])
+        end
+      end
+    end
+    
+    coma_place, coma_angle = ((action - 25) / 8).to_i, (action - 25) % 8
+    
+    if ai_comas[coma_place] == nil
+      action = rand(0...25)
+      act_x, act_y = action % 5, (action / 5).to_i
+      act_x, act_y = rotate_place(*mirror_place(act_x, act_y, mirror_amount), rotate_amount)
+      action = act_x + act_y * 5
+      return action, rotate_amount, mirror_amount
+    end
+    
+    act_x, act_y = ai_comas[coma_place]
+    act_x, act_y = rotate_place(*mirror_place(act_x, act_y, mirror_amount), rotate_amount)
+    
+    is_finish = false
+    comas_count = 0
+    look_maps.each_with_index do |y_list, y|
+      for x in 0...5
+        coma = y_list[x]
+        if coma == $turn
+          if [act_x, act_y] == [x, y]
+            is_finish = true
+            break
+          end
+          
+          comas_count += 1
+        end
+      end
+      
+      if is_finish
+        break
+      end
+    end
+    action = 25 + 8 * comas_count + (coma_angle + rotate_amount * 2 + mirror_amount * 4) % 8
+  end
+  
+  return action, rotate_amount, mirror_amount
 end
 
 def put_memory(maps, action)
-  state = 0
-  for y in 0...5
-    for x in 0...5
-      state += maps[y][x] * (3 ** (x + y * 5))
+  states = []
+  look_mapses = []
+  look_maps = deepcopy(maps)
+  for rotate in 0...4
+    for mirror in 0...2
+      state = maps_to_int(look_maps)
+      states.push(state)
+      look_maps = mirror_maps(look_maps)
+      look_mapses.push(look_maps)
     end
+    look_maps = rotate_maps(look_maps)
+  end
+  state = states.min
+  look_maps = look_mapses[states.index(state)]
+  rotate_amount, mirror_amount = (states.index(state) / 2).to_i, states.index(state) % 2
+  
+  if action < 25
+    act_x, act_y = action % 5, (action / 5).to_i
+    act_x, act_y = rotate_place(*mirror_place(act_x, act_y, mirror_amount), rotate_amount)
+    action = act_x + act_y * 5
+  else
+    ai_comas = []
+    for y in 0...5
+      for x in 0...5
+        if $maps[y][x] == $turn
+          ai_comas.push([x.to_i, y.to_i])
+        end
+      end
+    end
+    
+    coma_place, coma_angle = ((action - 25) / 8).to_i, (action - 25) % 8
+    act_x, act_y = ai_comas[coma_place]
+    act_x, act_y = rotate_place(*mirror_place(act_x, act_y, mirror_amount), rotate_amount)
+    
+    is_finish = false
+    comas_count = 0
+    look_maps.each_with_index do |y_list, y|
+      for x in 0...5
+        coma = y_list[x]
+        if coma == $turn
+          if [act_x, act_y] == [x, y]
+            is_finish = true
+            break
+          end
+          
+          comas_count += 1
+        end
+      end
+      
+      if is_finish
+        break
+      end
+    end
+    action = 25 + 8 * comas_count + (coma_angle + rotate_amount * 2 + mirror_amount * 4) % 8
   end
   
   action_list = $ai_data[state]
@@ -85,6 +190,17 @@ def put_memory(maps, action)
       action_list[1].push(1)
     end
   end
+end
+
+def maps_to_int(maps)
+  state = 0
+  for y in 0...5
+    for x in 0...5
+      state += maps[y][x] * (3 ** (x + y * 5))
+    end
+  end
+  
+  return state
 end
 
 $PROGRAM_NAME = "ai"
@@ -764,6 +880,63 @@ def debug
   end
 end
 
+def rotate_maps(maps, amount=1)
+  for i in 0...amount
+    rotated_maps = []
+    for y in 0...5
+      rotated_maps.push([])
+      for x in 0...5
+        rotated_maps[y].push(maps[x][-y + 4])
+      end
+    end
+    maps = deepcopy(rotated_maps)
+  end
+  
+  return maps
+end
+
+def mirror_maps(maps, amount=1)
+  for i in 0...amount
+    mirrored_maps = []
+    for y in 0...5
+      mirrored_maps.push([])
+      for x in 0...5
+        mirrored_maps[y].push(maps[y][-x + 4])
+      end
+    end
+    maps = deepcopy(mirrored_maps)
+  end
+  
+  return maps
+end
+
+def rotate_place(x, y, amount=1)
+  for i in 0...amount
+    x, y = -y + 4, x
+  end
+  return x, y
+end
+
+def mirror_place(x, y, amount=1)
+  for i in 0...amount
+    x, y = -x + 4, y
+  end
+  return x, y
+end
+
+def rotate_place_reversed(x, y, amount=1)
+  for i in 0...amount
+    x, y = y - 4, -x
+  end
+  return x, y
+end
+
+def mirror_place_reversed(x, y, amount=1)
+  for i in 0...amount
+    x, y = -x + 4, y
+  end
+  return x, y
+end
 
 $PROGRAM_NAME = "other defines"
 </script>
@@ -1019,15 +1192,14 @@ def standby # コマの行動待機
     $cx_real, $cy_real = ((mouseX - $ex) / $size.to_f).to_i, ((mouseY - $ey) / $size.to_f).to_i #/
   end
   
+  is_through = false
   if $is_ai_mode and $turn == $ais_turn # AIの行動
-    action = decide_pattern
+    action, rotated_amount, mirrored_amount = decide_pattern
     if action < 25
       $cx_real, $cy_real = (action % 5).to_i, (action / 5).to_i
       if can_put_judge($cx_real, $cy_real)
-        $is_clicked = true
+        is_through = true
         $is_cursol_reaction = true
-      else
-        $is_clicked = false
       end
     else
       ai_comas = []
@@ -1051,7 +1223,7 @@ def standby # コマの行動待機
         can_move, _ = move_simulation($cx_real, $cy_real, coma_angle * 45, $maps)
         if can_move
           $cx_real, $cy_real = ai_comas[coma_place]
-          $is_clicked = true
+          is_through = true
           $is_cursol_reaction = true
           $ai_action_bringer = coma_angle
         end
@@ -1071,13 +1243,13 @@ def standby # コマの行動待機
   end
   
   # クリックされたときの処理
-  if $is_clicked and $is_cursol_reaction
+  if (($is_ai_mode == false or $ais_turn != $turn) and $is_clicked and $is_cursol_reaction) or is_through
     $sx, $sy = $cx_real, $cy_real
     can_put = can_put_judge($sx, $sy)
     
     if $maps[$sy][$sx] == 0
       if can_put
-        if $turn == 1 and $is_ai_mode
+        if $turn != $ais_turn and $is_ai_mode
           put_memory($maps, $sx + $sy * 5)
         end
         
