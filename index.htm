@@ -45,7 +45,7 @@ StoreImage.createImage('ボドゲ部.jpeg', 1280, 499, 'data:image/jpeg;base64,/
     }
   end
 </script>
-<script type="text/ruby" section="s16" name="ai">
+<script type="text/ruby" section="s01" name="ai">
 $PROGRAM_NAME = "ai"
 # 追加のコード (your supplementary code here)
 def decide_pattern
@@ -190,6 +190,8 @@ def put_memory(maps, action)
       action_list[1].push(1)
     end
   end
+  
+  storeItem("ai_data", $ai_data)
 end
 
 def maps_to_int(maps)
@@ -205,7 +207,7 @@ end
 
 $PROGRAM_NAME = "ai"
 </script>
-<script type="text/ruby" section="s01" name="check reach">
+<script type="text/ruby" section="s02" name="check reach">
 $PROGRAM_NAME = "check reach"
 # 追加のコード (your supplementary code here)
 def check_reach
@@ -236,7 +238,7 @@ def check_reach
 end
 $PROGRAM_NAME = "check reach"
 </script>
-<script type="text/ruby" section="s02" name="credit">
+<script type="text/ruby" section="s03" name="credit">
 $PROGRAM_NAME = "credit"
 # 追加のコード (your supplementary code here)
 def credit
@@ -292,7 +294,7 @@ end
 
 $PROGRAM_NAME = "credit"
 </script>
-<script type="text/ruby" section="s03" name="deepcopy">
+<script type="text/ruby" section="s04" name="deepcopy">
 $PROGRAM_NAME = "deepcopy"
 # 追加のコード (your supplementary code here)
 def deepcopy(array) # 盤面をディープコピー
@@ -308,7 +310,7 @@ def deepcopy(array) # 盤面をディープコピー
 end
 $PROGRAM_NAME = "deepcopy"
 </script>
-<script type="text/ruby" section="s04" name="how to play">
+<script type="text/ruby" section="s05" name="how to play">
 $PROGRAM_NAME = "how to play"
 # 追加のコード (your supplementary code here)
 def how_to_play
@@ -558,7 +560,7 @@ end
 
 $PROGRAM_NAME = "how to play"
 </script>
-<script type="text/ruby" section="s05" name="moving">
+<script type="text/ruby" section="s06" name="moving">
 $PROGRAM_NAME = "moving"
 # 追加のコード (your supplementary code here)
 def moving
@@ -605,7 +607,7 @@ def moving
 end
 $PROGRAM_NAME = "moving"
 </script>
-<script type="text/ruby" section="s06" name="other defines">
+<script type="text/ruby" section="s07" name="other defines">
 $PROGRAM_NAME = "other defines"
 # 追加のコード (your supplementary code here)
 
@@ -700,6 +702,10 @@ end
 
 
 def can_put_judge(sx, sy) # 置いたコマが置けるかどうか判定
+  if $maps[sy][sx] == $turn # 置いた場所に既にコマがある
+    return false
+  end
+  
   # 周囲8マスに置かれていないか
   looks = [[1, 0], [0, 1], [-1, 0], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
   for look in looks
@@ -941,7 +947,7 @@ end
 
 $PROGRAM_NAME = "other defines"
 </script>
-<script type="text/ruby" section="s07" name="putting">
+<script type="text/ruby" section="s08" name="putting">
 $PROGRAM_NAME = "putting"
 # 追加のコード (your supplementary code here)
 def putting # コマを選択中
@@ -1083,7 +1089,7 @@ end
 
 $PROGRAM_NAME = "putting"
 </script>
-<script type="text/ruby" section="s08" name="screen info about match">
+<script type="text/ruby" section="s09" name="screen info about match">
 $PROGRAM_NAME = "screen info about match"
 # 追加のコード (your supplementary code here)
 def screen_info_about_match
@@ -1174,7 +1180,7 @@ end
 
 $PROGRAM_NAME = "screen info about match"
 </script>
-<script type="text/ruby" section="s09" name="standby">
+<script type="text/ruby" section="s10" name="standby">
 $PROGRAM_NAME = "standby"
 # 追加のコード (your supplementary code here)
 def standby # コマの行動待機
@@ -1195,6 +1201,7 @@ def standby # コマの行動待機
   
   is_through = false
   if $is_ai_mode and $turn == $ais_turn # AIの行動
+    $is_clicked = false
     action, rotated_amount, mirrored_amount = decide_pattern
     if action < 25
       $cx_real, $cy_real = (action % 5).to_i, (action / 5).to_i
@@ -1277,7 +1284,7 @@ end
 
 $PROGRAM_NAME = "standby"
 </script>
-<script type="text/ruby" section="s10" name="start">
+<script type="text/ruby" section="s11" name="start">
 $PROGRAM_NAME = "start"
 # 追加のコード (your supplementary code here)
 def start(can_click=true)
@@ -1466,7 +1473,7 @@ end
 
 $PROGRAM_NAME = "start"
 </script>
-<script type="text/ruby" section="s11" name="start settings">
+<script type="text/ruby" section="s12" name="start settings">
 $PROGRAM_NAME = "start settings"
 # 追加のコード (your supplementary code here)
 def start_settings
@@ -1591,7 +1598,7 @@ def start_settings
 end
 $PROGRAM_NAME = "start settings"
 </script>
-<script type="text/ruby" section="s12" name="telop">
+<script type="text/ruby" section="s13" name="telop">
 $PROGRAM_NAME = "telop"
 # 追加のコード (your supplementary code here)
 def telop # テロップを表示
@@ -1634,7 +1641,7 @@ end
 
 $PROGRAM_NAME = "telop"
 </script>
-<script type="text/ruby" section="s13" name="treat url">
+<script type="text/ruby" section="s14" name="treat url">
 $PROGRAM_NAME = "treat url"
 # 追加のコード (your supplementary code here)
 
@@ -1656,7 +1663,7 @@ end
 
 $PROGRAM_NAME = "treat url"
 </script>
-<script type="text/ruby" section="s14" name="win_judge">
+<script type="text/ruby" section="s15" name="win_judge">
 $PROGRAM_NAME = "win_judge"
 # 追加のコード (your supplementary code here)
 def win_judge(maps)
@@ -1772,7 +1779,12 @@ def setup
   $is_heavy = false
   $lighter_cool_time = -999999
   $can_previous = true
-  $ai_data = Hash.new()
+  
+  $ai_data = getItem("ai_data")
+  if $ai_data == nil
+    $ai_data = Hash.new()
+  end
+  
   $is_ai_mode = false
   $ai_action_bringer = nil
   $turn_exchange = false
